@@ -65,9 +65,9 @@
                                 <buttonConfiguration key="configuration" style="plain" image="plus" catalog="system"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GRc-Hq-i70">
-                                <rect key="frame" x="316" y="59" width="49" height="35"/>
+                                <rect key="frame" x="341" y="59" width="24" height="14"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.down.app.fill" catalog="system"/>
+                                <buttonConfiguration key="configuration" style="plain"/>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -88,6 +88,11 @@
                             <constraint firstItem="GRc-Hq-i70" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="JCe-IX-FqZ" secondAttribute="trailing" constant="8" symbolic="YES" id="zaP-xI-5On"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="AddButton" destination="R9W-re-brN" id="HGJ-ep-okW"/>
+                        <outlet property="FolderTable" destination="OFZ-Yc-AoD" id="jhB-xG-nyr"/>
+                        <outlet property="SortMenu" destination="GRc-Hq-i70" id="cd5-iH-SKr"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -95,7 +100,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.down.app.fill" catalog="system" width="128" height="114"/>
         <image name="plus" catalog="system" width="128" height="113"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
