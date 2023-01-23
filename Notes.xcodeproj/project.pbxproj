@@ -27,7 +27,7 @@
 		5596867E2977648400A59E79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		559686812977648400A59E79 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		559686832977648400A59E79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8F750AF4297F42780051E95C /* NotesInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotesInfoViewController.swift; path = Notes/NotesInfoViewController.swift; sourceTree = "<group>"; };
+		8F750AF4297F42780051E95C /* NotesInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesInfoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,7 +44,6 @@
 		559686662977648300A59E79 = {
 			isa = PBXGroup;
 			children = (
-				8F750AF4297F42780051E95C /* NotesInfoViewController.swift */,
 				559686712977648300A59E79 /* Notes */,
 				559686702977648300A59E79 /* Products */,
 			);
@@ -61,6 +60,7 @@
 		559686712977648300A59E79 /* Notes */ = {
 			isa = PBXGroup;
 			children = (
+				8F750AF4297F42780051E95C /* NotesInfoViewController.swift */,
 				559686722977648300A59E79 /* AppDelegate.swift */,
 				559686742977648300A59E79 /* SceneDelegate.swift */,
 				559686762977648300A59E79 /* ViewController.swift */,
