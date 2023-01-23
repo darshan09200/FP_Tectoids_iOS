@@ -51,6 +51,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         {
             let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
                 print("Delete Action Tapped")
+                self.folder.remove(at: indexPath.row)
+                self.folderTable.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+                self.folderTable.reloadData()
             }
             deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.red)
             deleteAction.backgroundColor = .red
