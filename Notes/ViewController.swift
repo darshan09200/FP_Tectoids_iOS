@@ -16,7 +16,7 @@ class folder{
 }
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    
+    private let searchController = UISearchController()
     var folder = [
     "groceries",
     "shopping"
@@ -85,6 +85,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         folderTable.dataSource = self
         self.sortMenu.menu = menu
         self.sortMenu.showsMenuAsPrimaryAction = true
+        configureSearchBar()
 	}
 
     @IBAction func addButton(_ sender: Any) {
@@ -106,7 +107,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
             
             self.present(alert, animated: true, completion: nil)
-        }
     }
+    
+    
+    private func configureSearchBar() {
+        navigationItem.searchController = searchController
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.delegate = self
+        searchController.delegate = self
+    }
+    
+}
+
+
+
+extension ViewController: UISearchControllerDelegate, UISearchBarDelegate {
+    
+
+}
     
 
