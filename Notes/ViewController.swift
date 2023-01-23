@@ -46,7 +46,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return folder.count
     }
-    
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
+       {
+           let pinnedAction = UIContextualAction(style: .destructive, title: "pin") { (action, view, handler) in
+               print("Pin Action Tapped")
+           }
+           pinnedAction.image = UIImage(systemName: "pin")?.withTintColor(.orange)
+           pinnedAction.backgroundColor = .orange
+           let configuration = UISwipeActionsConfiguration(actions: [pinnedAction])
+           return configuration
+       }
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
+        {
+            let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
+                print("Delete Action Tapped")
+            }
+            deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.red)
+            deleteAction.backgroundColor = .red
+            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+            return configuration
+        }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let categories = folder[indexPath.row]
