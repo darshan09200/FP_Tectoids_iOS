@@ -21,9 +21,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     "groceries",
     "shopping"
     ]
-    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var addButton: UIBarButtonItem!
     
-    @IBOutlet weak var sortMenu: UIButton!
+    @IBOutlet weak var sortMenu: UIBarButtonItem!
     
     @IBOutlet weak var folderTable: UITableView!
     //sort menu
@@ -84,7 +84,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         folderTable.delegate = self
         folderTable.dataSource = self
         self.sortMenu.menu = menu
-        self.sortMenu.showsMenuAsPrimaryAction = true
+       // self.sortMenu.showsMenuAsPrimaryAction = true
         configureSearchBar()
 	}
 

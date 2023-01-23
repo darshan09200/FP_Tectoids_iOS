@@ -32,22 +32,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="me4-dR-1Yq">
-                                <rect key="frame" x="16" y="155" width="47" height="35"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="plus" catalog="system"/>
-                                <connections>
-                                    <action selector="addButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qbf-23-6tj"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CYP-RQ-KeG">
-                                <rect key="frame" x="316" y="158" width="49" height="35"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.down.app.fill" catalog="system"/>
-                            </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="3Lr-hh-5n6">
-                                <rect key="frame" x="0.0" y="206" width="393" height="639"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="3Lr-hh-5n6">
+                                <rect key="frame" x="0.0" y="103" width="393" height="749"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cell" textLabel="6pa-W3-0ry" detailTextLabel="eys-2H-znb" style="IBUITableViewCellStyleSubtitle" id="785-Wv-8v8">
@@ -80,23 +66,31 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="me4-dR-1Yq" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="5AA-b7-ukC"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="CYP-RQ-KeG" secondAttribute="trailing" constant="28" id="UBa-3S-M1L"/>
-                            <constraint firstItem="CYP-RQ-KeG" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="me4-dR-1Yq" secondAttribute="trailing" constant="8" symbolic="YES" id="tZX-OL-tz0"/>
-                            <constraint firstItem="me4-dR-1Yq" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="xLt-61-xNk"/>
-                            <constraint firstItem="CYP-RQ-KeG" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="3" id="y1J-9O-mc3"/>
+                            <constraint firstItem="3Lr-hh-5n6" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="02Y-Sk-IMW"/>
+                            <constraint firstAttribute="bottom" secondItem="3Lr-hh-5n6" secondAttribute="bottom" id="6ce-NM-Mz4"/>
+                            <constraint firstItem="3Lr-hh-5n6" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Mv7-Nt-aZz"/>
+                            <constraint firstItem="3Lr-hh-5n6" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="g6m-q2-tnN"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Folders" largeTitleDisplayMode="always" id="SB5-Os-fyB"/>
+                    <navigationItem key="navigationItem" title="Folders" largeTitleDisplayMode="always" id="SB5-Os-fyB">
+                        <rightBarButtonItems>
+                            <barButtonItem title="Item" image="plus" catalog="system" id="iNk-I6-TmQ">
+                                <connections>
+                                    <action selector="addButton:" destination="BYZ-38-t0r" id="gS8-6R-RCC"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="arrow.down.app.fill" catalog="system" id="fwK-bG-2OB"/>
+                        </rightBarButtonItems>
+                    </navigationItem>
                     <connections>
-                        <outlet property="addButton" destination="me4-dR-1Yq" id="ooR-ye-IgW"/>
+                        <outlet property="addButton" destination="iNk-I6-TmQ" id="UFd-X4-3Um"/>
                         <outlet property="folderTable" destination="3Lr-hh-5n6" id="G0Q-Is-zch"/>
-                        <outlet property="sortMenu" destination="CYP-RQ-KeG" id="zne-gk-gic"/>
+                        <outlet property="sortMenu" destination="fwK-bG-2OB" id="xNi-pu-z6Y"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="117" y="4"/>
+            <point key="canvasLocation" x="116.79389312977099" y="3.5211267605633805"/>
         </scene>
     </scenes>
     <resources>
