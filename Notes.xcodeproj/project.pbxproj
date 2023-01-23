@@ -14,6 +14,7 @@
 		5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5596867B2977648300A59E79 /* Notes.xcdatamodeld */; };
 		5596867F2977648400A59E79 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5596867E2977648400A59E79 /* Assets.xcassets */; };
 		559686822977648400A59E79 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 559686802977648400A59E79 /* LaunchScreen.storyboard */; };
+		8F750AF5297F42780051E95C /* NotesInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F750AF4297F42780051E95C /* NotesInfoViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		5596867E2977648400A59E79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		559686812977648400A59E79 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		559686832977648400A59E79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8F750AF4297F42780051E95C /* NotesInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotesInfoViewController.swift; path = Notes/NotesInfoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +44,7 @@
 		559686662977648300A59E79 = {
 			isa = PBXGroup;
 			children = (
+				8F750AF4297F42780051E95C /* NotesInfoViewController.swift */,
 				559686712977648300A59E79 /* Notes */,
 				559686702977648300A59E79 /* Products */,
 			);
@@ -144,6 +147,7 @@
 				559686772977648300A59E79 /* ViewController.swift in Sources */,
 				559686732977648300A59E79 /* AppDelegate.swift in Sources */,
 				559686752977648300A59E79 /* SceneDelegate.swift in Sources */,
+				8F750AF5297F42780051E95C /* NotesInfoViewController.swift in Sources */,
 				5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
