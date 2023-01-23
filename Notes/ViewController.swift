@@ -16,6 +16,31 @@ class folder{
     }
 }
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource{
+   
+    var folder = [
+    "groceries",
+    "shopping"
+    ]
+    @IBOutlet weak var AddButton: UIButton!
+    
+    @IBOutlet weak var SortMenu: UIButton!
+    
+    @IBOutlet weak var FolderTable: UITableView!
+    let menu = UIMenu(title: "", options: .displayInline, children: [
+        UIAction(title: "Sort By Date",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+               },
+        UIAction(title: "Sort By Title",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+               },
+        UIAction(title: "Share",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+             }
+    
+    ])
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return folder.count
     }
@@ -33,17 +58,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return cell;
     }
 
-    var folder = [
-    "groceries",
-    "shopping"
-    ]
-    @IBOutlet weak var AddButton: UIButton!
-    
-    @IBOutlet weak var SortMenu: UIButton!
-    
-    @IBOutlet weak var FolderTable: UITableView!
-    
-    
     override func viewDidLoad() {
 		super.viewDidLoad()
         FolderTable.delegate = self
