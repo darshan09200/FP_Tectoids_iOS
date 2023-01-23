@@ -6,9 +6,51 @@
 //
 
 import UIKit
-
-class ViewController: UIViewController {
-
+class folder{
+    let title : String
+    
+    init(title: String) {
+        self.title = title
+      
+    }
+}
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    let menu = UIMenu(title: "", options: .displayInline, children: [
+        UIAction(title: "Sort By Date",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+               },
+        UIAction(title: "Sort By Title",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+               },
+        UIAction(title: "Share",
+               image: UIImage(systemName: "square.and.arrow.up.fill")) { action in
+               // Perform action
+             }
+    
+    ])
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return folder.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let categories = folder[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        
+        cell.textLabel?.text = folder[indexPath.row]
+        cell.textLabel?.textColor = .lightGray
+        cell.detailTextLabel?.textColor = .lightGray
+        cell.imageView?.image = UIImage(systemName: "folder")
+        cell.imageView?.tintColor = .orange
+        cell.selectionStyle = .none
+        return cell;
+    }
+    
+    var folder = [
+    "groceries",
+    "shopping"
+    ]
     @IBOutlet weak var addButton: UIButton!
     
     @IBOutlet weak var sortMenu: UIButton!
@@ -17,7 +59,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var folderTable: UITableView!
     override func viewDidLoad() {
 		super.viewDidLoad()
-		// Do any additional setup after loading the view.
+        folderTable.delegate = self
+        folderTable.dataSource = self
+        //self.sortMenu.menu = menu
+        self.sortMenu.showsMenuAsPrimaryAction = true
 	}
 
 
