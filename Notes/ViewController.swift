@@ -87,5 +87,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 	}
    
 
-}
+    @IBAction func AddButton(_ sender: Any) {
+        var textField = UITextField()
+        let alert = UIAlertController(title: "Add New Folder", message: "", preferredStyle: .alert)
+        let addAction = UIAlertAction(title: "Add", style: .default) { (action) in
+            self.folder.append(textField.text!)
+            self.FolderTable.reloadData()
+        }
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            
+            cancelAction.setValue(UIColor.red, forKey: "titleTextColor")
+            alert.addAction(addAction)
+            alert.addAction(cancelAction)
+            alert.addTextField { (field) in
+                textField = field
+                textField.placeholder = "folder name"
+            }
+            
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+
 
