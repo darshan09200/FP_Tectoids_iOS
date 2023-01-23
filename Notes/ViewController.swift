@@ -16,14 +16,14 @@ class folder{
 }
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    
+    private let searchController = UISearchController()
     var folder = [
     "groceries",
     "shopping"
     ]
-    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var addButton: UIBarButtonItem!
     
-    @IBOutlet weak var sortMenu: UIButton!
+    @IBOutlet weak var sortMenu: UIBarButtonItem!
     
     @IBOutlet weak var folderTable: UITableView!
     //sort menu
@@ -46,20 +46,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return folder.count
     }
-    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
-       {
-           let pinnedAction = UIContextualAction(style: .destructive, title: "pin") { (action, view, handler) in
-               print("Pin Action Tapped")
-           }
-           pinnedAction.image = UIImage(systemName: "pin")?.withTintColor(.orange)
-           pinnedAction.backgroundColor = .orange
-           let configuration = UISwipeActionsConfiguration(actions: [pinnedAction])
-           return configuration
-       }
+   
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
         {
             let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
                 print("Delete Action Tapped")
+                self.folder.remove(at: indexPath.row)
+                self.folderTable.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+                self.folderTable.reloadData()
             }
             deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.red)
             deleteAction.backgroundColor = .red
@@ -84,7 +78,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         folderTable.delegate = self
         folderTable.dataSource = self
         self.sortMenu.menu = menu
-        self.sortMenu.showsMenuAsPrimaryAction = true
+       // self.sortMenu.showsMenuAsPrimaryAction = true
+        configureSearchBar()
 	}
 
     @IBAction func addButton(_ sender: Any) {
@@ -106,7 +101,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
             
             self.present(alert, animated: true, completion: nil)
-        }
     }
+    
+    
+    private func configureSearchBar() {
+        navigationItem.searchController = searchController
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.delegate = self
+        searchController.delegate = self
+    }
+    
+}
+
+
+
+extension ViewController: UISearchControllerDelegate, UISearchBarDelegate {
+    
+
+}
     
 
