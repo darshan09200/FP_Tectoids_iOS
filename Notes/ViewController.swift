@@ -111,13 +111,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.present(alert, animated: true, completion: nil)
     }
     
-    
     private func configureSearchBar() {
-        navigationItem.searchController = searchController
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.delegate = self
-        searchController.delegate = self
-    }
+           navigationItem.searchController = searchController
+           searchController.obscuresBackgroundDuringPresentation = false
+           searchController.searchBar.delegate = self
+           searchController.delegate = self
+       }
+
     
 }
 
