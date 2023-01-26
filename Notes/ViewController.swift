@@ -48,17 +48,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
    
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
-        {
-            let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
-                print("Delete Action Tapped")
-                self.folder.remove(at: indexPath.row)
-                self.folderTable.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-                self.folderTable.reloadData()
+    {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, handler) in
+            print("Delete Action Tapped")
+            self.folder.remove(at: indexPath.row)
+            self.folderTable.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+            self.folderTable.reloadData()
+        }
+        deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.red)
+        deleteAction.backgroundColor = .red
+
+                let editAction = UIContextualAction(style: .normal, title: "edit") { (action, view, handler) in
+                    print("edit Action Tapped")
+                    
             }
-            deleteAction.image = UIImage(systemName: "trash")?.withTintColor(.red)
-            deleteAction.backgroundColor = .red
-            let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+
+        editAction.image = UIImage(systemName: "square.and.pencil")?.withTintColor(.orange)
+        editAction.backgroundColor = .orange
+            let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
             return configuration
+            
+
         }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
@@ -66,10 +76,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
         cell.textLabel?.text = folder[indexPath.row]
-        cell.textLabel?.textColor = .lightGray
-        cell.detailTextLabel?.textColor = .lightGray
         cell.imageView?.image = UIImage(systemName: "folder")
-        cell.imageView?.tintColor = .orange
+        cell.imageView?.tintColor = .systemBlue
         cell.selectionStyle = .none
         return cell;
     }
