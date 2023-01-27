@@ -104,6 +104,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.selectionStyle = .none
         return cell;
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: NotesViewController.identifier) as! NotesViewController
+//        controller.note = note
+//        controller.delegate = self
+        navigationController?.pushViewController(controller, animated: true)
+        
+    }
     override func viewDidLoad() {
 		super.viewDidLoad()
         folderTable.delegate = self

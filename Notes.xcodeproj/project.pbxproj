@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33372189297F551E0017DC64 /* NotesViewController.swift */; };
+		3337218C297F5C200017DC64 /* NotesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3337218B297F5C200017DC64 /* NotesTableViewCell.swift */; };
 		559686732977648300A59E79 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686722977648300A59E79 /* AppDelegate.swift */; };
 		559686752977648300A59E79 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686742977648300A59E79 /* SceneDelegate.swift */; };
 		559686772977648300A59E79 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686762977648300A59E79 /* ViewController.swift */; };
@@ -18,6 +20,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		33372189297F551E0017DC64 /* NotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewController.swift; sourceTree = "<group>"; };
+		3337218B297F5C200017DC64 /* NotesTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesTableViewCell.swift; sourceTree = "<group>"; };
 		5596866F2977648300A59E79 /* Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		559686722977648300A59E79 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		559686742977648300A59E79 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -69,6 +73,8 @@
 				559686802977648400A59E79 /* LaunchScreen.storyboard */,
 				559686832977648400A59E79 /* Info.plist */,
 				5596867B2977648300A59E79 /* Notes.xcdatamodeld */,
+				33372189297F551E0017DC64 /* NotesViewController.swift */,
+				3337218B297F5C200017DC64 /* NotesTableViewCell.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -146,8 +152,10 @@
 			files = (
 				559686772977648300A59E79 /* ViewController.swift in Sources */,
 				559686732977648300A59E79 /* AppDelegate.swift in Sources */,
+				3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */,
 				559686752977648300A59E79 /* SceneDelegate.swift in Sources */,
 				8F750AF5297F42780051E95C /* NotesInfoViewController.swift in Sources */,
+				3337218C297F5C200017DC64 /* NotesTableViewCell.swift in Sources */,
 				5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
