@@ -43,6 +43,7 @@ class Database {
 	func saveData() {
 		do {
 			try context.save()
+            loadData()
 		} catch {
 			print("Error saving data \(error.localizedDescription)")
 		}
