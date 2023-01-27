@@ -176,6 +176,39 @@
             </objects>
             <point key="canvasLocation" x="942.74809160305335" y="3.5211267605633805"/>
         </scene>
+        <!--Note-->
+        <scene sceneID="V5Q-fG-wtR">
+            <objects>
+                <viewController storyboardIdentifier="NoteViewController" id="reE-ni-yxP" customClass="NoteViewController" customModule="Notes" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="a2k-Ey-Kzh">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="interactive" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="geT-W2-eoQ" customClass="SubviewAttachingTextView" customModule="Notes" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="59" width="393" height="759"/>
+                                <attributedString key="attributedText"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="yny-Zv-nhR"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="geT-W2-eoQ" firstAttribute="top" secondItem="yny-Zv-nhR" secondAttribute="top" id="Zjc-kg-BJo"/>
+                            <constraint firstItem="yny-Zv-nhR" firstAttribute="bottom" secondItem="geT-W2-eoQ" secondAttribute="bottom" id="n0x-Ye-Lw8"/>
+                            <constraint firstItem="geT-W2-eoQ" firstAttribute="trailing" secondItem="yny-Zv-nhR" secondAttribute="trailing" id="nUV-Ss-Mh9"/>
+                            <constraint firstItem="geT-W2-eoQ" firstAttribute="leading" secondItem="yny-Zv-nhR" secondAttribute="leading" id="wEn-iI-blL"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Note" largeTitleDisplayMode="never" id="9dK-FW-bGr"/>
+                    <connections>
+                        <outlet property="textView" destination="geT-W2-eoQ" id="hz8-mw-hCs"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lUo-fL-2NV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1874" y="4"/>
+        </scene>
         <!--Notes Info View Controller-->
         <scene sceneID="Vrg-oi-SHe">
             <objects>
@@ -212,7 +245,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="K8v-KB-7S9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1747" y="4"/>
+            <point key="canvasLocation" x="2859" y="4"/>
         </scene>
     </scenes>
     <resources>

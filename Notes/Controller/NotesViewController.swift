@@ -83,7 +83,9 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
         return tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       //perform select function
+       
+		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+		navigationController?.pushViewController(controller, animated: true)
     }
 
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
