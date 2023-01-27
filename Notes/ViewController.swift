@@ -61,7 +61,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             // AlertView with Textfield for enter text
             let alert = UIAlertController(title: "Do you want to edit the folder?",message: "",preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "NO", style: UIAlertAction.Style.default, handler: {
+            alert.addAction(UIAlertAction(title: "No", style: .destructive, handler: {
                 (alertAction: UIAlertAction!) in
                 alert.dismiss(animated: true, completion: nil)
             }))
@@ -70,7 +70,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 textField.text = "\(self.folder[indexPath.row])"
             }
             
-            alert.addAction(UIAlertAction(title: "YES", style: UIAlertAction.Style.default, handler: {
+            alert.addAction(UIAlertAction(title: "Yes", style: UIAlertAction.Style.default, handler: {
                 (alertAction: UIAlertAction!) in
                 let textField = alert.textFields![0] // Force unwrapping because we know it exists.
                 if let i = self.folder.firstIndex(of: "\(self.folder[indexPath.row])") {
@@ -86,7 +86,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                            success(true)
                        })
             
-            editAction.image = UIImage(systemName: "square.and.pencil")?.withTintColor(.orange)
+             editAction.image = UIImage(systemName: "square.and.pencil")?.withTintColor(.orange)
             editAction.backgroundColor = .orange
             let configuration = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
             return configuration
