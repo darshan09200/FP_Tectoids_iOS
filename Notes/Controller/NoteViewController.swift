@@ -120,6 +120,22 @@ class NoteViewController: UIViewController {
 		addImagePress()
 	}
 	
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
+		
+		let attributedText = textView.attributedText!
+		let documentAttributes = [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.html]
+		do {
+			let htmlData = try attributedText.data(from: NSMakeRange(0, attributedText.length), documentAttributes:documentAttributes)
+			if let htmlString = String(data:htmlData,
+									   encoding:String.Encoding(rawValue: NSUTF8StringEncoding)) {
+				print(htmlString)
+			}
+		}
+		catch {
+			print("error creating HTML from Attributed String")
+		}
+	}
 	@objc func keyboardWillShow(notification: NSNotification) {
 		guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
 		else {

@@ -26,7 +26,8 @@ class NotesViewController: UIViewController {
                },
         UIAction(title: "Add Note",
                image: UIImage(systemName: "note.text.badge.plus")) { action in
-               // Perform action
+				   let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+				   self.navigationController?.pushViewController(controller, animated: true)
                }
     
     ])
@@ -70,7 +71,6 @@ class NotesViewController: UIViewController {
     @IBAction func createNewNoteClicked(_ sender: UIButton) {
         
     }
-    
     
 }
 
