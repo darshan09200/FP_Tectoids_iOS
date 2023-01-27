@@ -59,14 +59,23 @@ class NoteViewController: UIViewController {
 											target: self,
 											action: #selector(onItalicPress))
 	
-	lazy var addImageButton = UIBarButtonItem(title: "Done",
+	lazy var alignmentButton = UIBarButtonItem(title: "Alignment",
+											   style: .plain,
+											   target: self,
+											   action: #selector(onAlignmentPress))
+	
+	lazy var addImageButton = UIBarButtonItem(title: "Add Image",
 											  style: .plain,
 											  target: self,
 											  action: #selector(addImagePress))
 	
-	lazy var alignmentButton = UIBarButtonItem(title: "Alignment", style: .plain, target: self, action: #selector(onAlignmentPress))
+	lazy var addAudioButton = UIBarButtonItem(title: "Add Audio",
+											  style: .plain,
+											  target: self,
+											  action: #selector(addAudioPress))
 	
 	lazy var imagePickerController = ImagePicker(presentationController: self, delegate: self)
+	lazy var audioPickerController = AudioPicker(presentationController: self, delegate: self)
 	
 	let locationManager = CLLocationManager()
 	
@@ -112,11 +121,14 @@ class NoteViewController: UIViewController {
 		italicButton.image = UIImage(systemName: "italic")
 		italicButton.tintColor = .label
 		
+		alignmentButton.image = UIImage(systemName: "text.alignleft")
+		alignmentButton.tintColor = .label
+
 		addImageButton.image = UIImage(systemName: "photo")
 		addImageButton.tintColor = .label
 		
-		alignmentButton.image = UIImage(systemName: "text.alignleft")
-		alignmentButton.tintColor = .label
+		addAudioButton.image = UIImage(systemName: "music.quarternote.3")
+		addAudioButton.tintColor = .label
 		
 		optionsToolbar.items = [
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
@@ -129,6 +141,8 @@ class NoteViewController: UIViewController {
 			alignmentButton,
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
 			addImageButton,
+			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+			addAudioButton,
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
 		]
 		optionsToolbar.sizeToFit()
@@ -154,8 +168,6 @@ class NoteViewController: UIViewController {
 	
 	func loadData(){
 		if let content = note?.content{
-			print(note?.latitude)
-			print(note?.longitude)
 			DispatchQueue.main.async {
 				
 				let htmlData = NSString(string: content).data(using: String.Encoding.unicode.rawValue)
@@ -169,19 +181,21 @@ class NoteViewController: UIViewController {
 				
 				if let extras = self.note?.extras{
 					self.isSmall = extras.isSmall
+					var goBackPosition = 0
 					extras.attachments.forEach{ attachment in
-						if attachment.type == .image{
-							if let image = AttachmentImage.load(fileURL: attachment.path){
-								self.textView.selectedRange = NSRange(location: min(self.textView.attributedText.length, attachment.position), length: 0)
-//								if attachment.position - previousPosition < 2 {
-//									let attributedText = NSMutableAttributedString(attributedString: self.textView.attributedText)
-//									attributedText.insert(self.newLine, at: self.textView.selectedRange.location)
-//									self.textView.attributedText = attributedText
-//									self.textView.selectedRange = NSRange(location: min(self.textView.attributedText.length, attachment.position + 1), length: 0)
-//								}
-								
-								self.addImage(image: image)
+						if FileHandling.fileExists(attachment.path){
+							let position = min(self.textView.attributedText.length, max(attachment.position - goBackPosition, 0))
+							if attachment.type == .image{
+								if let image = AttachmentImage.load(fileURL: attachment.path){
+									self.textView.selectedRange = NSRange(location: position, length: 0)
+									self.addImage(image: image)
+								}
+							} else if attachment.type == .audio{
+								self.textView.selectedRange = NSRange(location: position, length: 0)
+								self.addAudio(path: attachment.path)
 							}
+						}else{
+							goBackPosition += 1
 						}
 					}
 				}
@@ -206,11 +220,16 @@ class NoteViewController: UIViewController {
 				attributedText.enumerateAttribute(.attachment, in: NSRange(location: 0, length: attributedText.length)){
 					value, range, stopLoop in
 					if let attachment = value as? SubviewTextAttachment,
-					   let provider = attachment.viewProvider as? DirectTextAttachedViewProvider,
-					   let imageView = provider.view as? AttachmentImageView
+					   let provider = attachment.viewProvider as? DirectTextAttachedViewProvider
 					{
-						if let image = imageView.image as? AttachmentImage, let path = image.path{
-							extras.append(Attachment(path: path, type: .image, position: range.location))
+						if let imageView = provider.view as? AttachmentImageView{
+							if let image = imageView.image as? AttachmentImage, let path = image.path{
+								extras.append(Attachment(path: path, type: .image, position: range.location))
+							}
+						} else if let audioView = provider.view as? AudioPlayer{
+							if let path = audioView.path{
+								extras.append(Attachment(path: path, type: .audio, position: range.location))
+							}
 						}
 					}
 				}
@@ -325,11 +344,6 @@ class NoteViewController: UIViewController {
 		updateStyle(.traitItalic)
 	}
 	
-	@objc func addImagePress(){
-		textView.resignFirstResponder()
-		imagePickerController.present()
-	}
-	
 	@objc func onAlignmentPress(){
 		guard let text = textView.attributedText?.mutableCopy() as? NSMutableAttributedString else { return }
 		let currentLine = getCurrentLine()
@@ -361,6 +375,16 @@ class NoteViewController: UIViewController {
 		textView.selectedRange = newCursorPosition
 		textView.typingAttributes = attributes.merging([.paragraphStyle: newParagraphStyle]){(_, new) in new}
 		setAlignmentButton(paragraphStyle: newParagraphStyle)
+	}
+	
+	@objc func addImagePress(){
+		textView.resignFirstResponder()
+		imagePickerController.present()
+	}
+	
+	@objc func addAudioPress(){
+		textView.resignFirstResponder()
+		audioPickerController.present()
 	}
 	
 	func getCurrentLine () -> NSRange{
@@ -426,8 +450,8 @@ class NoteViewController: UIViewController {
 		imageView.isUserInteractionEnabled = true
 		
 		
-		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
-		imageView.addGestureRecognizer(tapGestureRecognizer)
+//		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
+//		imageView.addGestureRecognizer(tapGestureRecognizer)
 		
 		let interaction = ImageInteraction(delegate: self)
 		interaction.path = image.path
@@ -477,6 +501,17 @@ class NoteViewController: UIViewController {
 		}
 		textView.attributedText = attributedText
 		
+	}
+	
+	func addAudio(path: String){
+		var attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
+		let audioView = AudioPlayer(frame: CGRect(x: 8, y: 8, width: maxImageWidth - 16, height: 64), path: path)
+		let audioAttachment = SubviewTextAttachment(view: audioView, size: audioView.frame.size)
+		attributedText = NSMutableAttributedString(attributedString: attributedText
+			.insertingAttachment(audioAttachment, at: textView.selectedRange.location))
+		attributedText.insert(newLine, at: textView.selectedRange.location+1)
+		textView.becomeFirstResponder()
+		textView.attributedText = attributedText
 	}
 	
 	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
@@ -772,6 +807,15 @@ extension NoteViewController: CLLocationManagerDelegate{
 	}
 }
 
+extension NoteViewController: AudioPickerDelegate{
+	func didSelect(path: String?) {
+		if let path = path{
+			self.addAudio(path: path)
+		}
+		textView.resignFirstResponder()
+	}
+}
+
 
 internal class ImageTapGestureRecognizer: UITapGestureRecognizer{
 	var image: String?;
@@ -791,31 +835,3 @@ internal class AttachmentImageView: UIImageView{
 	}
 }
 
-
-extension UIFont {
-	var bold: UIFont {
-		return with(.traitBold)
-	}
-	
-	var italic: UIFont {
-		return with(.traitItalic)
-	}
-	
-	var boldItalic: UIFont {
-		return with([.traitBold, .traitItalic])
-	}
-	
-	func with(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
-		guard let descriptor = self.fontDescriptor.withSymbolicTraits(UIFontDescriptor.SymbolicTraits(traits).union(self.fontDescriptor.symbolicTraits)) else {
-			return self
-		}
-		return UIFont(descriptor: descriptor, size: pointSize)
-	}
-	
-	func without(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
-		guard let descriptor = self.fontDescriptor.withSymbolicTraits(self.fontDescriptor.symbolicTraits.subtracting(UIFontDescriptor.SymbolicTraits(traits))) else {
-			return self
-		}
-		return UIFont(descriptor: descriptor, size: pointSize)
-	}
-}

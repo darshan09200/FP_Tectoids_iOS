@@ -3,6 +3,7 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Map view configurations" minToolsVersion="14.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -34,7 +35,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="3Lr-hh-5n6">
-                                <rect key="frame" x="0.0" y="155" width="393" height="697"/>
+                                <rect key="frame" x="0.0" y="103" width="393" height="749"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="sectionIndexColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -124,7 +125,7 @@
                                 </connections>
                             </tableView>
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zkN-LS-IRU">
-                                <rect key="frame" x="0.0" y="755.66666666666663" width="393" height="96.333333333333371"/>
+                                <rect key="frame" x="0.0" y="756" width="393" height="96"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="7yt-T9-7U4">
                                     <rect key="frame" x="0.0" y="0.0" width="393" height="96"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -217,6 +218,55 @@
             </objects>
             <point key="canvasLocation" x="1874" y="4"/>
         </scene>
+        <!--Record View Controller-->
+        <scene sceneID="de2-3f-vdN">
+            <objects>
+                <viewController storyboardIdentifier="RecordViewController" id="pB0-Sg-gX0" customClass="RecordViewController" customModule="Notes" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="qkV-XV-vDm">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="300"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XfO-Ps-PA4">
+                                <rect key="frame" x="16" y="91" width="361" height="29"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gOJ-es-e1L">
+                                <rect key="frame" x="16" y="152" width="361" height="116"/>
+                                <inset key="imageEdgeInsets" minX="8" minY="8" maxX="8" maxY="8"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" buttonSize="large">
+                                    <imageReference key="image" image="mic" catalog="system" symbolScale="large"/>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="onRecordPress" destination="pB0-Sg-gX0" eventType="touchUpInside" id="Tpy-kZ-9fp"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="khp-9c-y5Z"/>
+                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="XfO-Ps-PA4" firstAttribute="top" secondItem="khp-9c-y5Z" secondAttribute="top" constant="32" id="GTY-j6-lYV"/>
+                            <constraint firstItem="khp-9c-y5Z" firstAttribute="trailing" secondItem="XfO-Ps-PA4" secondAttribute="trailing" constant="16" id="NvP-Zb-dHB"/>
+                            <constraint firstItem="gOJ-es-e1L" firstAttribute="leading" secondItem="khp-9c-y5Z" secondAttribute="leading" constant="16" id="OOA-p2-U54"/>
+                            <constraint firstItem="XfO-Ps-PA4" firstAttribute="leading" secondItem="khp-9c-y5Z" secondAttribute="leading" constant="16" id="Uvc-8j-vGT"/>
+                            <constraint firstItem="khp-9c-y5Z" firstAttribute="bottom" secondItem="gOJ-es-e1L" secondAttribute="bottom" constant="32" id="Zj2-tL-fJQ"/>
+                            <constraint firstItem="gOJ-es-e1L" firstAttribute="top" secondItem="XfO-Ps-PA4" secondAttribute="bottom" constant="32" id="jhn-5d-lkQ"/>
+                            <constraint firstItem="khp-9c-y5Z" firstAttribute="trailing" secondItem="gOJ-es-e1L" secondAttribute="trailing" constant="16" id="l6c-Q6-GuE"/>
+                        </constraints>
+                    </view>
+                    <size key="freeformSize" width="393" height="300"/>
+                    <connections>
+                        <outlet property="recordButton" destination="gOJ-es-e1L" id="Z0i-FP-haA"/>
+                        <outlet property="timeLabel" destination="XfO-Ps-PA4" id="3Ep-nO-IQS"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hAK-1c-4iD" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1917" y="670"/>
+        </scene>
         <!--Notes Info View Controller-->
         <scene sceneID="Vrg-oi-SHe">
             <objects>
@@ -258,8 +308,12 @@
     </scenes>
     <resources>
         <image name="arrow.up.arrow.down" catalog="system" width="128" height="97"/>
+        <image name="mic" catalog="system" width="110" height="128"/>
         <image name="plus" catalog="system" width="128" height="113"/>
         <image name="square.and.pencil" catalog="system" width="128" height="113"/>
+        <systemColor name="secondarySystemBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
