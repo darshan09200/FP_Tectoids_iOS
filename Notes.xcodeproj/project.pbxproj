@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3304F25C298467FE0068B18F /* AddTaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3304F25B298467FE0068B18F /* AddTaskViewController.swift */; };
 		3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33372189297F551E0017DC64 /* NotesViewController.swift */; };
 		3337218C297F5C200017DC64 /* NotesTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3337218B297F5C200017DC64 /* NotesTableViewCell.swift */; };
 		55086092298391FD00F5F4EB /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55086091298391FD00F5F4EB /* Attachment.swift */; };
@@ -39,6 +40,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3304F25B298467FE0068B18F /* AddTaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskViewController.swift; sourceTree = "<group>"; };
 		33372189297F551E0017DC64 /* NotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewController.swift; sourceTree = "<group>"; };
 		3337218B297F5C200017DC64 /* NotesTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesTableViewCell.swift; sourceTree = "<group>"; };
 		55086091298391FD00F5F4EB /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				5582CD7F29835D2C00B29347 /* NoteViewController.swift */,
 				5508609D29842BBF00F5F4EB /* ImageInteraction.swift */,
 				550860A32984370100F5F4EB /* RecordViewController.swift */,
+				3304F25B298467FE0068B18F /* AddTaskViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -273,6 +276,7 @@
 				5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */,
 				555D9FAE29835E7800E3DDC7 /* SubviewAttachingTextView.swift in Sources */,
 				550860962983975600F5F4EB /* AttachmentTransformer.swift in Sources */,
+				3304F25C298467FE0068B18F /* AddTaskViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
