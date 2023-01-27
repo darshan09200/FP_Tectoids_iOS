@@ -85,6 +85,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         folderTable.dataSource = self
         self.sortMenu.menu = menu
         self.sortMenu.showsMenuAsPrimaryAction = true
+		Database.getInstance()
 	}
 
     @IBAction func addButton(_ sender: Any) {
