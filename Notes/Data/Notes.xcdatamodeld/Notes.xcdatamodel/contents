@@ -12,8 +12,9 @@
     <entity name="Note" representedClassName="Note" syncable="YES" codeGenerationType="class">
         <attribute name="content" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="extras" optional="YES" attributeType="String"/>
-        <attribute name="location" optional="YES" attributeType="String"/>
+        <attribute name="extras" optional="YES" attributeType="Transformable" valueTransformerName="AttachmentTransformer" customClassName="Attachments"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="noteId" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="parentFolder" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Folder" inverseName="notes" inverseEntity="Folder"/>

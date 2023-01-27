@@ -35,7 +35,7 @@ class NotesViewController: UIViewController {
     ])
     override func viewDidLoad() {
         super.viewDidLoad()
-
+		loadData()
         addButton.showsMenuAsPrimaryAction = true
 
         addButton.menu = addMenu
@@ -46,23 +46,20 @@ class NotesViewController: UIViewController {
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		
+		loadData()
+	}
+
+	func loadData(){
 		var filterPredicate: NSPredicate?
 		if let selectedFolder = selectedFolder{
 			filterPredicate = NSPredicate(format: "parentFolder.name == %@", selectedFolder.name!)
 		}
-		notes = Note.getData(for: filterPredicate) as! [Note]
+		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
+		if let data = Note.getData(for: filterPredicate, with: [sortDescriptor]) as? [Note]{
+			notes = data
+		}
 		tableView.reloadData()
 	}
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
     @IBAction func addButton(_ sender: Any) {
     }
