@@ -14,35 +14,74 @@ class NotesViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var NotesCountLbl: UILabel!
+    @IBOutlet weak var countLbl: UILabel!
+    
     
     @IBOutlet weak var addButton: UIButton!
-    
+    let segmentControl = UISegmentedControl(items: ["Notes", "Tasks"])
     var notes = [Note]()
     var selectedFolder: Folder?
-    lazy var addMenu = UIMenu(title: "", options: .displayInline, children: [
-        UIAction(title: "Add Task",
-               image: UIImage(systemName: "calendar.badge.plus")) { action in
-               // Perform action
-               },
-        UIAction(title: "Add Note",
-               image: UIImage(systemName: "note.text.badge.plus")) { action in
-				   let controller = UIStoryboard(name: "Main", bundle: nil)
-					   .instantiateViewController(identifier: "NoteViewController") as! NoteViewController
-				   controller.parentFolder = self.selectedFolder
-				   self.navigationController?.pushViewController(controller, animated: true)
-               }
-    
-    ])
+//    lazy var addMenu = UIMenu(title: "", options: .displayInline, children: [
+//        UIAction(title: "Add Task",
+//               image: UIImage(systemName: "calendar.badge.plus")) { action in
+//               // Perform action
+//               },
+//        UIAction(title: "Add Note",
+//               image: UIImage(systemName: "note.text.badge.plus")) { action in
+//				   let controller = UIStoryboard(name: "Main", bundle: nil)
+//					   .instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+//				   controller.parentFolder = self.selectedFolder
+//				   self.navigationController?.pushViewController(controller, animated: true)
+//               }
+//
+//    ])
     override func viewDidLoad() {
         super.viewDidLoad()
 		loadData()
-        addButton.showsMenuAsPrimaryAction = true
+        //addButton.showsMenuAsPrimaryAction = true
 
-        addButton.menu = addMenu
+        //ddButton.menu = addMenu
         // Do any additional setup after loading the view.
         configureSearchBar()
+        tableView.sectionHeaderTopPadding = 0
+        
+                segmentControl.selectedSegmentIndex = 0
+                segmentControl.addTarget(self, action: #selector(segmentValueChanged(_:)), for: .valueChanged)
+
+                tableView.tableHeaderView = segmentControl
+                tableView.translatesAutoresizingMaskIntoConstraints = false
+        
     }
     
+    @objc func segmentValueChanged(_ sender: UISegmentedControl) {
+            // Handle the value changed event here
+            print("Selected index: \(sender.selectedSegmentIndex)")
+        
+            if(sender.selectedSegmentIndex == 1){
+                NotesCountLbl.text = " Tasks"
+                navigationItem.title = "Tasks"
+                
+            }
+            if(sender.selectedSegmentIndex == 0){
+                NotesCountLbl.text = " Notes"
+                navigationItem.title = "Notes"
+                
+            }
+
+    }
+//    @objc func segmentChanged(_ sender: UISegmentedControl) {
+//        switch sender.selectedSegmentIndex {
+//        case 0:
+//            let firstViewController = NoteViewController()
+//            navigationController?.pushViewController(firstViewController, animated: true)
+//        case 1:
+//            let secondViewController = AddTaskViewController()
+//            navigationController?.pushViewController(secondViewController, animated: true)
+//        default:
+//            break
+//        }
+//    }
+
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		
@@ -56,14 +95,32 @@ class NotesViewController: UIViewController {
 		}
 		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
 		if let data = Note.getData(for: filterPredicate, with: [sortDescriptor]) as? [Note]{
-			notes = data
+			notes = data + data + data + data + data + data + data + data + data + data + data + data
 		}
 		tableView.reloadData()
 	}
 
     @IBAction func addButton(_ sender: Any) {
+        print("CLICKKKKKKKKK")
+        addButtonClick()
     }
-    
+
+    func addButtonClick(){
+                switch  segmentControl.selectedSegmentIndex {
+                    case 0:
+                    let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+                        controller.parentFolder = self.selectedFolder
+                        self.navigationController?.pushViewController(controller, animated: true)
+                        break
+                    case 1:
+                    let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "AddTask") as! AddTaskViewController
+                        //controller.parentFolder = self.selectedFolder
+                        self.navigationController?.pushViewController(controller, animated: true)
+                        break
+                    default:
+                       break
+                    }
+    }
     private func configureSearchBar() {
         navigationItem.searchController = searchController
         searchController.obscuresBackgroundDuringPresentation = false
@@ -90,9 +147,9 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath) as! NotesTableViewCell
 		let note = notes[indexPath.row]
-		cell.textLabel?.text = note.noteId?.uuidString
+		cell.noteTitle?.text = note.noteId?.uuidString
 		return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
