@@ -17,7 +17,7 @@
 		5582CD8029835D2C00B29347 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5582CD7F29835D2C00B29347 /* NoteViewController.swift */; };
 		559686732977648300A59E79 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686722977648300A59E79 /* AppDelegate.swift */; };
 		559686752977648300A59E79 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686742977648300A59E79 /* SceneDelegate.swift */; };
-		559686772977648300A59E79 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686762977648300A59E79 /* ViewController.swift */; };
+		559686772977648300A59E79 /* FoldersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686762977648300A59E79 /* FoldersViewController.swift */; };
 		5596867A2977648300A59E79 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 559686782977648300A59E79 /* Main.storyboard */; };
 		5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5596867B2977648300A59E79 /* Notes.xcdatamodeld */; };
 		5596867F2977648400A59E79 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5596867E2977648400A59E79 /* Assets.xcassets */; };
@@ -39,7 +39,7 @@
 		5596866F2977648300A59E79 /* Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		559686722977648300A59E79 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		559686742977648300A59E79 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		559686762977648300A59E79 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		559686762977648300A59E79 /* FoldersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldersViewController.swift; sourceTree = "<group>"; };
 		559686792977648300A59E79 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		5596867C2977648300A59E79 /* Notes.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Notes.xcdatamodel; sourceTree = "<group>"; };
 		5596867E2977648400A59E79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -88,7 +88,7 @@
 			children = (
 				33372189297F551E0017DC64 /* NotesViewController.swift */,
 				8F750AF4297F42780051E95C /* NotesInfoViewController.swift */,
-				559686762977648300A59E79 /* ViewController.swift */,
+				559686762977648300A59E79 /* FoldersViewController.swift */,
 				5582CD7F29835D2C00B29347 /* NoteViewController.swift */,
 			);
 			path = Controller;
@@ -215,7 +215,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				559686772977648300A59E79 /* ViewController.swift in Sources */,
+				559686772977648300A59E79 /* FoldersViewController.swift in Sources */,
 				559686732977648300A59E79 /* AppDelegate.swift in Sources */,
 				3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */,
 				555D9FB229835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift in Sources */,

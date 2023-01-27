@@ -17,6 +17,8 @@ class NotesViewController: UIViewController {
     
     @IBOutlet weak var addButton: UIButton!
     
+    var notes = [Note]()
+    var selectedFolder: Folder?
     lazy var addMenu = UIMenu(title: "", options: .displayInline, children: [
         UIAction(title: "Add Task",
                image: UIImage(systemName: "calendar.badge.plus")) { action in
@@ -37,6 +39,11 @@ class NotesViewController: UIViewController {
         // Do any additional setup after loading the view.
         configureSearchBar()
         
+        var filterPredicate: NSPredicate?
+        if let selectedFolder = selectedFolder{
+            filterPredicate = NSPredicate(format: "parentFolder.id == %@", selectedFolder.name!)
+        }
+        notes = Note.getData(for: filterPredicate) as! [Note]
     }
     
 
@@ -76,7 +83,7 @@ extension NotesViewController: UISearchControllerDelegate, UISearchBarDelegate {
 
 extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return notes.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
