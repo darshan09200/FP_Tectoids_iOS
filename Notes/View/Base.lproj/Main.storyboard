@@ -124,9 +124,9 @@
                                 </connections>
                             </tableView>
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zkN-LS-IRU">
-                                <rect key="frame" x="0.0" y="755.33333333333337" width="393" height="96.666666666666629"/>
+                                <rect key="frame" x="0.0" y="755.66666666666663" width="393" height="96.333333333333371"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="7yt-T9-7U4">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="97"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="96"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 Notes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u63-Je-BAL">

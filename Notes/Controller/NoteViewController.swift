@@ -9,6 +9,10 @@ import UIKit
 
 class NoteViewController: UIViewController {
 	
+	var note: Note?
+	
+	var parentFolder: Folder?
+	
 	@IBOutlet weak var textView: SubviewAttachingTextView!
 	
 	private lazy var maxImageWidth = textView.frame.width
@@ -72,7 +76,21 @@ class NoteViewController: UIViewController {
 		
 		textView.font = defaultStyle[.font] as? UIFont
 		
-		textView.insertText("Hello")
+		if let content = note?.content{
+			DispatchQueue.main.async {
+				
+				let htmlData = NSString(string: content).data(using: String.Encoding.unicode.rawValue)
+				print(htmlData)
+				
+				let options = [NSAttributedString.DocumentReadingOptionKey.documentType:
+								NSAttributedString.DocumentType.html]
+				let attributedText = try? NSMutableAttributedString(data: htmlData ?? Data(),
+																	options: options,
+																	documentAttributes: nil)
+				print(attributedText)
+				self.textView.attributedText = attributedText
+			}
+		}
 		
 		let optionsToolbar = UIToolbar(frame:CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 64))
 		optionsToolbar.barStyle = .default
@@ -116,25 +134,42 @@ class NoteViewController: UIViewController {
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		maxImageWidth = UIScreen.main.bounds.width - textView.layoutMargins.left - textView.layoutMargins.right
-		
-		addImagePress()
 	}
 	
 	override func viewWillDisappear(_ animated: Bool) {
-		super.viewWillDisappear(animated)
+		if note == nil{
+			note = Note()
+			print("created")
+			note!.noteId = UUID()
+			note!.createdAt = Date.now
+			note!.updatedAt = Date.now
+		}
+		
+		if let parentFolder = parentFolder{
+			note!.parentFolder = parentFolder
+		}
 		
 		let attributedText = textView.attributedText!
 		let documentAttributes = [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.html]
 		do {
 			let htmlData = try attributedText.data(from: NSMakeRange(0, attributedText.length), documentAttributes:documentAttributes)
-			if let htmlString = String(data:htmlData,
-									   encoding:String.Encoding(rawValue: NSUTF8StringEncoding)) {
-				print(htmlString)
+			if let content = String(data:htmlData,
+									encoding:String.Encoding(rawValue: NSUTF8StringEncoding)) {
+				note!.content = content
+				note!.updatedAt = Date.now
+				
+				print("saved")
 			}
 		}
 		catch {
 			print("error creating HTML from Attributed String")
 		}
+		
+		
+		Database.getInstance().saveData()
+		
+		super.viewWillDisappear(animated)
+		
 	}
 	@objc func keyboardWillShow(notification: NSNotification) {
 		guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue

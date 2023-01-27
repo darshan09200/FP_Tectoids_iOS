@@ -98,8 +98,9 @@ class FoldersViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: NotesViewController.identifier) as! NotesViewController
-        //        controller.note = note
-        //        controller.delegate = self
+        
+		let folder = Database.getInstance().folders[indexPath.row]
+		controller.selectedFolder = folder
         navigationController?.pushViewController(controller, animated: true)
         
     }

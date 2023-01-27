@@ -26,7 +26,9 @@ class NotesViewController: UIViewController {
                },
         UIAction(title: "Add Note",
                image: UIImage(systemName: "note.text.badge.plus")) { action in
-				   let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+				   let controller = UIStoryboard(name: "Main", bundle: nil)
+					   .instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+				   controller.parentFolder = self.selectedFolder
 				   self.navigationController?.pushViewController(controller, animated: true)
                }
     
@@ -39,14 +41,18 @@ class NotesViewController: UIViewController {
         addButton.menu = addMenu
         // Do any additional setup after loading the view.
         configureSearchBar()
-        
-        var filterPredicate: NSPredicate?
-        if let selectedFolder = selectedFolder{
-            filterPredicate = NSPredicate(format: "parentFolder.id == %@", selectedFolder.name!)
-        }
-        notes = Note.getData(for: filterPredicate) as! [Note]
     }
     
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		
+		var filterPredicate: NSPredicate?
+		if let selectedFolder = selectedFolder{
+			filterPredicate = NSPredicate(format: "parentFolder.name == %@", selectedFolder.name!)
+		}
+		notes = Note.getData(for: filterPredicate) as! [Note]
+		tableView.reloadData()
+	}
 
     /*
     // MARK: - Navigation
@@ -87,11 +93,17 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
+		let note = notes[indexPath.row]
+		cell.textLabel?.text = note.noteId?.uuidString
+		return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
+		tableView.deselectRow(at: indexPath, animated: true)
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+		let note = notes[indexPath.row]
+		controller.parentFolder = selectedFolder
+		controller.note = note
 		navigationController?.pushViewController(controller, animated: true)
     }
 
