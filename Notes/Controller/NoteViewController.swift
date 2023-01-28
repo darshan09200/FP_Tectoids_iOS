@@ -6,8 +6,13 @@
 //
 
 import UIKit
+import CoreLocation
 
 class NoteViewController: UIViewController {
+	
+	var note: Note?
+	
+	var parentFolder: Folder?
 	
 	@IBOutlet weak var textView: SubviewAttachingTextView!
 	
@@ -54,25 +59,56 @@ class NoteViewController: UIViewController {
 											target: self,
 											action: #selector(onItalicPress))
 	
-	lazy var addImageButton = UIBarButtonItem(title: "Done",
+	lazy var alignmentButton = UIBarButtonItem(title: "Alignment",
+											   style: .plain,
+											   target: self,
+											   action: #selector(onAlignmentPress))
+	
+	lazy var addImageButton = UIBarButtonItem(title: "Add Image",
 											  style: .plain,
 											  target: self,
 											  action: #selector(addImagePress))
 	
-	lazy var alignmentButton = UIBarButtonItem(title: "Alignment", style: .plain, target: self, action: #selector(onAlignmentPress))
+	lazy var addAudioButton = UIBarButtonItem(title: "Add Audio",
+											  style: .plain,
+											  target: self,
+											  action: #selector(addAudioPress))
+	
+	lazy var imagePickerController = ImagePicker(presentationController: self, delegate: self)
+	lazy var audioPickerController = AudioPicker(presentationController: self, delegate: self)
+	
+	let locationManager = CLLocationManager()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Initialization code
 		
+		if note == nil{
+			note = Note()
+			note!.noteId = UUID()
+			note!.createdAt = Date.now
+			note!.updatedAt = Date.now
+		}
+		
+		if let parentFolder = parentFolder{
+			note!.parentFolder = parentFolder
+		}
+		
+		loadData()
+		
 		textView.textDragInteraction?.isEnabled = false
 		textView.delegate = self
+		
+		locationManager.requestWhenInUseAuthorization()
+	
+		locationManager.delegate = self
+		locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+		locationManager.startUpdatingLocation()
 		
 		textView.typingAttributes = defaultStyle
 		
 		textView.font = defaultStyle[.font] as? UIFont
 		
-		textView.insertText("Hello")
 		
 		let optionsToolbar = UIToolbar(frame:CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 64))
 		optionsToolbar.barStyle = .default
@@ -85,11 +121,14 @@ class NoteViewController: UIViewController {
 		italicButton.image = UIImage(systemName: "italic")
 		italicButton.tintColor = .label
 		
+		alignmentButton.image = UIImage(systemName: "text.alignleft")
+		alignmentButton.tintColor = .label
+
 		addImageButton.image = UIImage(systemName: "photo")
 		addImageButton.tintColor = .label
 		
-		alignmentButton.image = UIImage(systemName: "text.alignleft")
-		alignmentButton.tintColor = .label
+		addAudioButton.image = UIImage(systemName: "music.quarternote.3")
+		addAudioButton.tintColor = .label
 		
 		optionsToolbar.items = [
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
@@ -102,6 +141,8 @@ class NoteViewController: UIViewController {
 			alignmentButton,
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
 			addImageButton,
+			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+			addAudioButton,
 			UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
 		]
 		optionsToolbar.sizeToFit()
@@ -116,10 +157,98 @@ class NoteViewController: UIViewController {
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		maxImageWidth = UIScreen.main.bounds.width - textView.layoutMargins.left - textView.layoutMargins.right
-		
-		addImagePress()
 	}
 	
+	override func viewWillDisappear(_ animated: Bool) {
+		saveData()
+		
+		super.viewWillDisappear(animated)
+		
+	}
+	
+	func loadData(){
+		if let content = note?.content{
+			DispatchQueue.main.async {
+				
+				let htmlData = NSString(string: content).data(using: String.Encoding.unicode.rawValue)
+				
+				let options = [NSAttributedString.DocumentReadingOptionKey.documentType:
+								NSAttributedString.DocumentType.html]
+				let attributedText = try? NSMutableAttributedString(data: htmlData ?? Data(),
+																	options: options,
+																	documentAttributes: nil)
+				self.textView.attributedText = attributedText?.attributedStringByTrimmingCharacterSet(charSet: .newlines)
+				
+				if let extras = self.note?.extras{
+					self.isSmall = extras.isSmall
+					var goBackPosition = 0
+					extras.attachments.forEach{ attachment in
+						if FileHandling.fileExists(attachment.path){
+							let position = min(self.textView.attributedText.length, max(attachment.position - goBackPosition, 0))
+							if attachment.type == .image{
+								if let image = AttachmentImage.load(fileURL: attachment.path){
+									self.textView.selectedRange = NSRange(location: position, length: 0)
+									self.addImage(image: image)
+								}
+							} else if attachment.type == .audio{
+								self.textView.selectedRange = NSRange(location: position, length: 0)
+								self.addAudio(path: attachment.path)
+							}
+						}else{
+							goBackPosition += 1
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	
+	func saveData(){
+		let attributedText = textView.attributedText!
+		let documentAttributes = [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.html]
+		do {
+			let htmlData = try attributedText.data(from: NSMakeRange(0, attributedText.length), documentAttributes:documentAttributes)
+			if let content = String(data:htmlData,
+									encoding:String.Encoding(rawValue: NSUTF8StringEncoding)) {
+				note!.content = content
+				note!.updatedAt = Date.now
+				
+				var extras = [Attachment]()
+				
+				attributedText.enumerateAttribute(.attachment, in: NSRange(location: 0, length: attributedText.length)){
+					value, range, stopLoop in
+					if let attachment = value as? SubviewTextAttachment,
+					   let provider = attachment.viewProvider as? DirectTextAttachedViewProvider
+					{
+						if let imageView = provider.view as? AttachmentImageView{
+							if let image = imageView.image as? AttachmentImage, let path = image.path{
+								extras.append(Attachment(path: path, type: .image, position: range.location))
+							}
+						} else if let audioView = provider.view as? AudioPlayer{
+							if let path = audioView.path{
+								extras.append(Attachment(path: path, type: .audio, position: range.location))
+							}
+						}
+					}
+				}
+				
+				note?.extras = Attachments(attachments: extras, isSmall: isSmall)
+				if attributedText.length > 0{
+					print("saved")
+					Database.getInstance().saveData()
+				} else{
+					print("deleted")
+					Note.context.delete(note!)
+				}
+			}
+		}
+		catch {
+			print("error creating HTML from Attributed String")
+		}
+		
+	}
 	@objc func keyboardWillShow(notification: NSNotification) {
 		guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
 		else {
@@ -153,16 +282,22 @@ class NoteViewController: UIViewController {
 			style = .body
 		}
 		guard let text = textView.attributedText?.mutableCopy() as? NSMutableAttributedString else { return }
+		
 		let currentLine = getCurrentLine()
 		let cursorPosition = currentLine.location
-		let attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		var attributes = textView.typingAttributes
+		if textView.attributedText.length > 0{
+			attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		}
 		var newFont: UIFont = .preferredFont(forTextStyle: style)
 		if let font = attributes[.font] as? UIFont{
 			newFont = .preferredFont(forTextStyle: style).with(font.fontDescriptor.symbolicTraits)
 		}
 		
 		let newCursorPosition = NSRange(location: textView.selectedRange.location + textView.selectedRange.length, length: 0)
-		text.addAttributes([.font: newFont], range: currentLine)
+		if text.length > 0{
+			text.addAttributes([.font: newFont], range: currentLine)
+		}
 		textView.attributedText = text
 		textView.selectedRange = newCursorPosition
 		textView.typingAttributes = attributes.merging([.font: newFont]){(_, new) in new}
@@ -174,7 +309,10 @@ class NoteViewController: UIViewController {
 		if cursorPosition >= textView.attributedText.length || textView.selectedRange.length == 0{
 			cursorPosition -= 1
 		}
-		var attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		var attributes = textView.typingAttributes
+		if textView.attributedText.length > 0 {
+			attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		}
 		guard let text = textView.attributedText?.mutableCopy() as? NSMutableAttributedString else { return }
 		if let font = attributes[.font] as? UIFont{
 			if !font.familyName.contains("Apple"){
@@ -185,7 +323,9 @@ class NoteViewController: UIViewController {
 			} else {
 				attributes[.font] = font.with(trait)
 			}
-			text.addAttributes([.font: attributes[.font]!], range: textView.selectedRange)
+			if text.length > 0{
+				text.addAttributes([.font: attributes[.font]!], range: textView.selectedRange)
+			}
 			let newCursorPosition = NSRange(location: textView.selectedRange.location + textView.selectedRange.length, length: 0)
 			textView.attributedText = text.copy() as? NSAttributedString
 			if textView.selectedRange.length == 0 {
@@ -204,21 +344,19 @@ class NoteViewController: UIViewController {
 		updateStyle(.traitItalic)
 	}
 	
-	@objc func addImagePress(){
-		print("added image")
-		addImage(image: UIImage(named: "dummy.jpg")!)
-	}
-	
 	@objc func onAlignmentPress(){
 		guard let text = textView.attributedText?.mutableCopy() as? NSMutableAttributedString else { return }
 		let currentLine = getCurrentLine()
 		let cursorPosition = currentLine.location
-		let attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		var attributes = defaultStyle
+		if text.length > 0 && currentLine.location < text.length{
+			attributes = text.attributes(at: cursorPosition, effectiveRange: nil)
+		}
 		var currentAlignment: NSTextAlignment = .left
-		if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle{
+		if currentLine.length <= 1,
+		   let paragraphStyle = textView.typingAttributes[.paragraphStyle] as? NSParagraphStyle{
 			currentAlignment = paragraphStyle.alignment
-		} else if currentLine.length == 1,
-				  let paragraphStyle = textView.typingAttributes[.paragraphStyle] as? NSParagraphStyle{
+		} else if let paragraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle{
 			currentAlignment = paragraphStyle.alignment
 		}
 		let newParagraphStyle = NSMutableParagraphStyle()
@@ -230,18 +368,32 @@ class NoteViewController: UIViewController {
 			newParagraphStyle.alignment = .center
 		}
 		let newCursorPosition = NSRange(location: textView.selectedRange.location + textView.selectedRange.length, length: 0)
-		text.addAttributes([.paragraphStyle: newParagraphStyle], range: currentLine)
+		if text.length > 0{
+			text.addAttributes([.paragraphStyle: newParagraphStyle], range: currentLine)
+		}
 		textView.attributedText = text
 		textView.selectedRange = newCursorPosition
 		textView.typingAttributes = attributes.merging([.paragraphStyle: newParagraphStyle]){(_, new) in new}
 		setAlignmentButton(paragraphStyle: newParagraphStyle)
 	}
 	
+	@objc func addImagePress(){
+		textView.resignFirstResponder()
+		imagePickerController.present()
+	}
+	
+	@objc func addAudioPress(){
+		textView.resignFirstResponder()
+		audioPickerController.present()
+	}
+	
 	func getCurrentLine () -> NSRange{
-		let cursorPosition = textView.selectedRange.location
 		let attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
 		let actualString = attributedText.string
-		
+		if actualString.count == 0 {
+			return NSRange(location: 0, length: 1)
+		}
+		let cursorPosition = textView.selectedRange.location
 		let previousString = actualString.prefix(cursorPosition)
 		let startIndex = previousString.lastIndex{ $0.isNewline }
 		
@@ -257,14 +409,17 @@ class NoteViewController: UIViewController {
 		if let endIndex = endIndex{
 			endLocation = cursorPosition + postString.distance(from: postString.startIndex, to: endIndex)
 		}
-		startLocation = min(actualString.count - 1, startLocation)
+		startLocation = min(max(actualString.count - 1, 0), startLocation)
 		endLocation = min(actualString.count, endLocation)
 		
 		return NSRange(location: startLocation, length: endLocation - startLocation)
 	}
 	
 	func getNewWidthHeight(oldWidth: CGFloat, oldHeight: CGFloat, scaledToWidth: CGFloat)->(CGFloat, CGFloat){
-		let scaleFactor = scaledToWidth / oldWidth
+		let scaleWidthFactor = scaledToWidth / oldWidth
+		let scaleHeightFactor = scaledToWidth / oldHeight
+		
+		let scaleFactor = oldWidth > oldHeight || !isSmall ? scaleWidthFactor : scaleHeightFactor
 		
 		let newHeight = oldHeight * scaleFactor
 		let newWidth = oldWidth * scaleFactor
@@ -272,17 +427,19 @@ class NoteViewController: UIViewController {
 		return (newWidth, newHeight)
 	}
 	
-	func imageWithImage (sourceImage:UIImage, scaledToWidth: CGFloat) -> UIImage {
+	func imageWithImage (sourceImage:AttachmentImage, scaledToWidth: CGFloat) -> AttachmentImage {
 		let (newWidth, newHeight) = getNewWidthHeight(oldWidth: sourceImage.size.width, oldHeight: sourceImage.size.height, scaledToWidth: scaledToWidth)
 		
 		UIGraphicsBeginImageContext(CGSize(width:newWidth, height:newHeight))
 		sourceImage.draw(in: CGRect(x:8, y:8, width:newWidth - CGFloat(16), height:newHeight - CGFloat(16)))
 		let newImage = UIGraphicsGetImageFromCurrentImageContext()
 		UIGraphicsEndImageContext()
-		return newImage!
+		let image = AttachmentImage(cgImage: newImage!.cgImage!)
+		image.path = sourceImage.path
+		return image
 	}
 	
-	func addImage(image: UIImage){
+	func addImage(image: AttachmentImage){
 		var attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
 		
 		let resizedImage = imageWithImage(sourceImage: image, scaledToWidth: maxImageWidth)
@@ -293,10 +450,11 @@ class NoteViewController: UIViewController {
 		imageView.isUserInteractionEnabled = true
 		
 		
-		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
-		imageView.addGestureRecognizer(tapGestureRecognizer)
+//		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
+//		imageView.addGestureRecognizer(tapGestureRecognizer)
 		
-		let interaction = UIContextMenuInteraction(delegate: self)
+		let interaction = ImageInteraction(delegate: self)
+		interaction.path = image.path
 		imageView.addInteraction(interaction)
 		let imageAttachment = SubviewTextAttachment(view: imageView, size: imageView.frame.size)
 		
@@ -309,19 +467,27 @@ class NoteViewController: UIViewController {
 		let previousTextRange = NSRange(location: textView.selectedRange.location - 1, length: 1)
 		if previousTextRange.location > -1{
 			let previousText = attributedText.attributedSubstring(from: previousTextRange)
-			if previousText.string != "\n" && !isSmall {
-				attributedText.insert(newLine, at: previousTextRange.location + 1)
-				newLinePosition += 1
-			} else if isSmall{
-				let previousImageRange = NSRange(location: previousTextRange.location - 1, length: 1)
+//			if previousText.string != "\n" && !isSmall {
+//				attributedText.insert(newLine, at: previousTextRange.location + 1)
+//				newLinePosition += 1
+//			} else if isSmall{
+				let previousImageRange = NSRange(location: previousTextRange.location - (previousText.string == "\n" ? 1 : 0), length: 1)
 				if previousImageRange.location > -1 {
 					let previousImage = attributedText.attributedSubstring(from: previousImageRange)
 					if isResizableImage(attachment: previousImage){
-						attributedText.deleteCharacters(in: previousTextRange)
-						newLinePosition -= 1
+						if previousText.string == "\n"{
+							attributedText.deleteCharacters(in: previousTextRange)
+							newLinePosition -= 1
+						}
+					} else if previousText.string != "\n" {
+						attributedText.insert(newLine, at: previousTextRange.location + 1)
+						newLinePosition += 1
 					}
+				}else if previousText.string != "\n"{
+					attributedText.insert(newLine, at: previousTextRange.location + 1)
+					newLinePosition += 1
 				}
-			}
+//			}
 		}
 		
 		let postTextRange = NSRange(location: textView.selectedRange.location + textView.selectedRange.length + 1, length: 1)
@@ -337,6 +503,17 @@ class NoteViewController: UIViewController {
 		
 	}
 	
+	func addAudio(path: String){
+		var attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
+		let audioView = AudioPlayer(frame: CGRect(x: 8, y: 8, width: maxImageWidth - 16, height: 64), path: path)
+		let audioAttachment = SubviewTextAttachment(view: audioView, size: audioView.frame.size)
+		attributedText = NSMutableAttributedString(attributedString: attributedText
+			.insertingAttachment(audioAttachment, at: textView.selectedRange.location))
+		attributedText.insert(newLine, at: textView.selectedRange.location+1)
+		textView.becomeFirstResponder()
+		textView.attributedText = attributedText
+	}
+	
 	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
 		print("tapped")
 	}
@@ -347,53 +524,59 @@ class NoteViewController: UIViewController {
 extension NoteViewController: UITextViewDelegate{
 	
 	func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-		if text.count == 0{
-			var isPostImage = false
-			let postRange = NSRange(location: range.location + 1, length: 1)
-			if postRange.location < textView.attributedText.length{
-				isPostImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: postRange))
-			}
-			if isPostImage{
+		if textView.attributedText.length > 0{
+			if text.count == 0{
+				var isPostImage = false
+				let postRange = NSRange(location: range.location + 1, length: 1)
+				if postRange.location < textView.attributedText.length{
+					isPostImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: postRange))
+				}
+				if isPostImage{
+					var isPreviousImage = false
+					let previousRange = NSRange(location: range.location -
+												1
+//												(isSmall ? 1 : 2)
+												, length: 1)
+					if previousRange.location > -1{
+						isPreviousImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: previousRange))
+					}
+					if !isPreviousImage{
+						textView.selectedRange = NSMakeRange(max(range.location, 0), 0)
+						return false
+					}
+				}
+			} else {
+				var isPostImage = false
+				let postRange = NSRange(location: range.location, length: 1)
+				if postRange.location < textView.attributedText.length{
+					isPostImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: postRange))
+				}
+				
 				var isPreviousImage = false
-				let previousRange = NSRange(location: range.location - 2, length: 1)
-				if previousRange.location > 0{
+				let previousRange = NSRange(location: range.location - 1, length: 1)
+				if previousRange.location > -1{
 					isPreviousImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: previousRange))
 				}
-				if !isPreviousImage{
-					textView.selectedRange = NSMakeRange(max(range.location, 0), 0)
-					return false
-				}
-			}
-		} else {
-			var isPostImage = false
-			let postRange = NSRange(location: range.location, length: 1)
-			if postRange.location < textView.attributedText.length{
-				isPostImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: postRange))
-			}
-			
-			var isPreviousImage = false
-			let previousRange = NSRange(location: range.location - 1, length: 1)
-			if previousRange.location > 0{
-				isPreviousImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: previousRange))
-			}
-			if isPreviousImage || isPostImage{
-				textView.typingAttributes = defaultStyle
-				if !text.first!.isNewline{
-					let attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
-					let newText = NSMutableAttributedString(attributedString:  NSAttributedString(string: text).addingAttributes(defaultStyle))
-					var newCursorPosition = textView.selectedRange.location + text.count
-					if isPreviousImage{
-						newText.insert(newLine, at: 0)
-						newCursorPosition += 1
+				if isPreviousImage || isPostImage{
+					textView.typingAttributes = defaultStyle
+					if !text.first!.isNewline{
+						let attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
+						let newText = NSMutableAttributedString(attributedString:  NSAttributedString(string: text).addingAttributes(defaultStyle))
+						var newCursorPosition = textView.selectedRange.location + text.count
+						if isPreviousImage{
+							newText.insert(newLine, at: 0)
+							newCursorPosition += 1
+						}
+						if isPostImage{
+							newText.append(newLine)
+						}
+						attributedText.insert(newText, at: textView.selectedRange.location)
+						newCursorPosition = max(newCursorPosition, attributedText.length)
+						let selectedRange = NSRange(location: newCursorPosition, length: 0)
+						textView.attributedText = attributedText
+						textView.selectedRange = selectedRange
+						return false
 					}
-					if isPostImage{
-						newText.append(newLine)
-					}
-					attributedText.insert(newText, at: textView.selectedRange.location)
-					let selectedRange = NSRange(location: newCursorPosition, length: 0)
-					textView.attributedText = attributedText
-					textView.selectedRange = selectedRange
-					return false
 				}
 			}
 		}
@@ -451,7 +634,11 @@ extension NoteViewController: UITextViewDelegate{
 		if cursorPosition < 0 {
 			cursorPosition = 0
 		}
-		let attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		
+		var attributes = textView.typingAttributes
+		if textView.attributedText.length > 0{
+			attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+		}
 		
 		if let font = attributes[.font] as? UIFont{
 			setBoldItalicButton(font: font)
@@ -479,7 +666,9 @@ extension NoteViewController: UITextViewDelegate{
 	}
 	
 	func textViewDidChange(_ textView: UITextView) {
-		
+		if textView.attributedText.length == 0{
+			textView.typingAttributes = defaultStyle
+		}
 	}
 }
 
@@ -503,68 +692,127 @@ extension NoteViewController: UIContextMenuInteractionDelegate {
 	
 	func resizeImages(){
 		isSmall = !isSmall
-		var attributedText: NSMutableAttributedString = self.textView.attributedText.mutableCopy() as! NSMutableAttributedString
-		attributedText.enumerateAttribute(
-			NSAttributedString.Key.attachment,
-			in: NSRange(location: 0, length: attributedText.length))
-		{ value, range, _ in
-			if let attachment = value as? SubviewTextAttachment,
-			   let provider = attachment.viewProvider as? DirectTextAttachedViewProvider,
-			   let oldImageView = provider.view as? AttachmentImageView {
-				if(oldImageView.shouldResize){
-					let possiblePreviousImageIndex = range.location - (isSmall ? 2 : 1)
-					let isPreviousImage = isResizableImage(attachment: attributedText.attributedSubstring(from: NSRange(location: possiblePreviousImageIndex, length: 1)))
-					var replaceRange = NSRange(location: range.location, length: range.length)
-					var insertRange = NSRange(location: range.location, length: range.length)
-					var style: NSParagraphStyle?
-					if isPreviousImage {
-						if isSmall{
-							replaceRange = NSRange(location: possiblePreviousImageIndex + 1, length: range.length + (isSmall ? 1 : 0))
-							insertRange = NSRange(location: insertRange.location - (isSmall ? 1 : 0), length: insertRange.length)
-						} else {
-							if let attachmentStyle =  attributedText.attributes(at: range.location, effectiveRange: nil)[NSAttributedString.Key.paragraphStyle] as? NSParagraphStyle{
-								style = attachmentStyle
-							}
-						}
-					}
-					attributedText.replaceCharacters(in: replaceRange, with: "")
-					
-					let image = oldImageView.image!.clone()!
-					let imageView = AttachmentImageView(image: image, shouldResize: true)
-					
-					let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
-					imageView.addGestureRecognizer(tapGestureRecognizer)
-					
-					let interaction = UIContextMenuInteraction(delegate: self)
-					imageView.addInteraction(interaction)
-					
-					imageView.isUserInteractionEnabled = true
-					
-					let (newWidth, newHeight) = getNewWidthHeight(oldWidth: image.size.width, oldHeight: image.size.height, scaledToWidth: self.maxImageWidth * (isSmall ? 0.5 : 1))
-					imageView.frame.size = CGSize(width: newWidth, height: newHeight)
-					
-					let updatedAttahment = SubviewTextAttachment(view: imageView, size: imageView.frame.size)
-					if let style = style{
-						attributedText = NSMutableAttributedString(attributedString: attributedText.insertingAttachment(updatedAttahment, at: insertRange.location, with: style))
-					}else{
-						attributedText.insertAttachment(updatedAttahment, at: insertRange.location)
-					}
-				}
-			}
-			
-		}
-		self.textView.attributedText = (attributedText.copy() as! NSAttributedString)
+		saveData()
+		loadData()
+		
+		/**
+		 Strictly for reference
+		 
+		 var attributedText: NSMutableAttributedString = self.textView.attributedText.mutableCopy() as! NSMutableAttributedString
+		 attributedText.enumerateAttribute(
+		 NSAttributedString.Key.attachment,
+		 in: NSRange(location: 0, length: attributedText.length))
+		 { value, range, _ in
+		 if let attachment = value as? SubviewTextAttachment,
+		 let provider = attachment.viewProvider as? DirectTextAttachedViewProvider,
+		 let oldImageView = provider.view as? AttachmentImageView {
+			 if(oldImageView.shouldResize){
+			 let possiblePreviousImageIndex = range.location - (isSmall ? 2 : 1)
+			 var isPreviousImage = false
+			 if possiblePreviousImageIndex > -1{
+				isPreviousImage = isResizableImage(attachment: attributedText.attributedSubstring(from: NSRange(location:
+							possiblePreviousImageIndex, length: 1)))
+			 }
+			 var replaceRange = NSRange(location: range.location, length: range.length)
+			 var insertRange = NSRange(location: range.location, length: range.length)
+			 if isPreviousImage && isSmall {
+				replaceRange = NSRange(location: possiblePreviousImageIndex + 1, length: range.length + (isSmall ? 1 : 0))
+				insertRange = NSRange(location: insertRange.location - (isSmall ? 1 : 0), length: insertRange.length)
+			 } else {
+				 let previousTextRange = NSRange(location: range.location - 1, length: 1)
+				 if previousTextRange.location > -1{
+					 let isPreviousNewLine = attributedText.attributedSubstring(from: previousTextRange).string == "\n"
+					 if !isPreviousNewLine{
+						 attributedText.insert(newLine, at: range.location)
+						 replaceRange = NSRange(location: range.location + 1, length: range.length)
+						 insertRange = NSRange(location: insertRange.location + 1, length: insertRange.length)
+					 }
+				 }
+			 }
+			 replaceRange = NSRange(location: max(replaceRange.location, attributedText.length - 1), length: replaceRange.length)
+			 attributedText.replaceCharacters(in: replaceRange, with: "")
+			 
+			 let image = (oldImageView.image as! AttachmentImage).clone()!
+			 let imageView = AttachmentImageView(image: image, shouldResize: true)
+			 
+			 let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
+			 imageView.addGestureRecognizer(tapGestureRecognizer)
+			 
+			 let interaction = UIContextMenuInteraction(delegate: self)
+			 imageView.addInteraction(interaction)
+			 
+			 imageView.isUserInteractionEnabled = true
+			 
+			 let (newWidth, newHeight) = getNewWidthHeight(oldWidth: image.size.width, oldHeight: image.size.height, scaledToWidth:
+									self.maxImageWidth * (isSmall ? 0.5 : 1))
+			 imageView.frame.size = CGSize(width: newWidth, height: newHeight)
+			 
+			 let updatedAttahment = SubviewTextAttachment(view: imageView, size: imageView.frame.size)
+			 
+			 attributedText.insertAttachment(updatedAttahment, at: insertRange.location)
+			 }
+		 }
+		 
+		 }
+		 self.textView.attributedText = (attributedText.copy() as! NSAttributedString)
+		 */
 	}
 	
 	func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
 		return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-			let importAction = UIAction(title: "Import", image: UIImage(systemName: "folder")) { action in }
-			let createAction = UIAction(title: "Resize", image: UIImage(systemName: "square.and.pencil")) { action in
-				self.resizeImages()
-				
+			var actions = [UIAction]()
+			let shareAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { action in
+				if let interaction = interaction as? ImageInteraction, let path = interaction.path{					
+					self.imagePickerController.shareImage(path: path, sourceView: interaction.view)
+				}
 			}
-			return UIMenu(title: "", children: [importAction, createAction])
+			
+			if let _ = interaction as? ImageInteraction{
+				actions.append(shareAction)
+			}
+			
+			let resizeAction = UIAction(title: "Resize", image: UIImage(systemName: self.isSmall ? "arrow.up.left.and.arrow.down.right" : "arrow.down.right.and.arrow.up.left")) { action in
+				self.resizeImages()
+			}
+			
+			actions.append(resizeAction)
+			return UIMenu(title: "", children: actions)
 		}
+	}
+}
+
+
+extension NoteViewController: ImagePickerDelegate {
+	
+	func didSelect(image: UIImage?) {
+		if let image = image{
+			let path = FileHandling.saveToDirectory(image)
+			if let path = path{
+				let attachmentImage = AttachmentImage(cgImage: image.cgImage!, scale: image.scale, orientation: image.imageOrientation)
+				attachmentImage.path = path
+				addImage(image: attachmentImage)
+			}
+		} else{
+			print("no image")
+		}
+		textView.becomeFirstResponder()
+	}
+}
+
+extension NoteViewController: CLLocationManagerDelegate{
+	func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+		guard let location: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+		note?.latitude = Double(location.longitude)
+		note?.longitude = Double(location.latitude)
+	}
+}
+
+extension NoteViewController: AudioPickerDelegate{
+	func didSelect(path: String?) {
+		if let path = path{
+			self.addAudio(path: path)
+		}
+		textView.resignFirstResponder()
 	}
 }
 
@@ -573,32 +821,10 @@ internal class ImageTapGestureRecognizer: UITapGestureRecognizer{
 	var image: String?;
 }
 
-internal extension UIImage {
-	convenience init?(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
-		let rect = CGRect(origin: .zero, size: size)
-		UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
-		color.setFill()
-		UIRectFill(rect)
-		let image = UIGraphicsGetImageFromCurrentImageContext()
-		UIGraphicsEndImageContext()
-		
-		guard let cgImage = image?.cgImage else { return nil }
-		self.init(cgImage: cgImage)
-	}
-	
-	func clone() -> UIImage? {
-		guard let originalCgImage = self.cgImage, let newCgImage = originalCgImage.copy() else {
-			return nil
-		}
-		
-		return UIImage(cgImage: newCgImage, scale: self.scale, orientation: self.imageOrientation)
-	}
-}
-
 internal class AttachmentImageView: UIImageView{
 	var shouldResize = false
 	
-	init(image: UIImage?, shouldResize: Bool = false) {
+	init(image: AttachmentImage?, shouldResize: Bool = false) {
 		super.init(image: image)
 		self.shouldResize = shouldResize
 		layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -609,31 +835,3 @@ internal class AttachmentImageView: UIImageView{
 	}
 }
 
-
-extension UIFont {
-	var bold: UIFont {
-		return with(.traitBold)
-	}
-	
-	var italic: UIFont {
-		return with(.traitItalic)
-	}
-	
-	var boldItalic: UIFont {
-		return with([.traitBold, .traitItalic])
-	}
-	
-	func with(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
-		guard let descriptor = self.fontDescriptor.withSymbolicTraits(UIFontDescriptor.SymbolicTraits(traits).union(self.fontDescriptor.symbolicTraits)) else {
-			return self
-		}
-		return UIFont(descriptor: descriptor, size: pointSize)
-	}
-	
-	func without(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
-		guard let descriptor = self.fontDescriptor.withSymbolicTraits(self.fontDescriptor.symbolicTraits.subtracting(UIFontDescriptor.SymbolicTraits(traits))) else {
-			return self
-		}
-		return UIFont(descriptor: descriptor, size: pointSize)
-	}
-}

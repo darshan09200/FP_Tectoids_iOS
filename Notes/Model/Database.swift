@@ -77,6 +77,8 @@ extension NSManagedObject: Fetchable {
 			return nil
 		}
 	}
+	
+	@nonobjc
 	public override convenience init() {
 		self.init(context: NSManagedObject.context)
 	}

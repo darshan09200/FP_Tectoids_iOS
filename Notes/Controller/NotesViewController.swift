@@ -26,36 +26,40 @@ class NotesViewController: UIViewController {
                },
         UIAction(title: "Add Note",
                image: UIImage(systemName: "note.text.badge.plus")) { action in
-               // Perform action
+				   let controller = UIStoryboard(name: "Main", bundle: nil)
+					   .instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+				   controller.parentFolder = self.selectedFolder
+				   self.navigationController?.pushViewController(controller, animated: true)
                }
     
     ])
     override func viewDidLoad() {
         super.viewDidLoad()
-
+		loadData()
         addButton.showsMenuAsPrimaryAction = true
 
         addButton.menu = addMenu
         // Do any additional setup after loading the view.
         configureSearchBar()
-        
-        var filterPredicate: NSPredicate?
-        if let selectedFolder = selectedFolder{
-            filterPredicate = NSPredicate(format: "parentFolder.id == %@", selectedFolder.name!)
-        }
-        notes = Note.getData(for: filterPredicate) as! [Note]
     }
     
+	override func viewWillAppear(_ animated: Bool) {
+		super.viewWillAppear(animated)
+		
+		loadData()
+	}
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+	func loadData(){
+		var filterPredicate: NSPredicate?
+		if let selectedFolder = selectedFolder{
+			filterPredicate = NSPredicate(format: "parentFolder.name == %@", selectedFolder.name!)
+		}
+		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
+		if let data = Note.getData(for: filterPredicate, with: [sortDescriptor]) as? [Note]{
+			notes = data
+		}
+		tableView.reloadData()
+	}
 
     @IBAction func addButton(_ sender: Any) {
     }
@@ -70,7 +74,6 @@ class NotesViewController: UIViewController {
     @IBAction func createNewNoteClicked(_ sender: UIButton) {
         
     }
-    
     
 }
 
@@ -87,11 +90,17 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath)
+		let note = notes[indexPath.row]
+		cell.textLabel?.text = note.noteId?.uuidString
+		return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
+		tableView.deselectRow(at: indexPath, animated: true)
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "NoteViewController") as! NoteViewController
+		let note = notes[indexPath.row]
+		controller.parentFolder = selectedFolder
+		controller.note = note
 		navigationController?.pushViewController(controller, animated: true)
     }
 
