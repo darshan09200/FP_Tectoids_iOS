@@ -7,7 +7,7 @@
 
 import UIKit
 
-class NotesViewController: UIViewController {
+class NotesViewController: UIViewController, UISearchResultsUpdating {
 
     private let searchController = UISearchController()
     static let identifier = "NotesVC"
@@ -15,7 +15,6 @@ class NotesViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var NotesCountLbl: UILabel!
     @IBOutlet weak var countLbl: UILabel!
-    
     
     @IBOutlet weak var addButton: UIButton!
     let segmentControl = UISegmentedControl(items: ["Notes", "Tasks"])
@@ -35,6 +34,16 @@ class NotesViewController: UIViewController {
 //               }
 //
 //    ])
+    
+    private var isSearchBarEmpty: Bool {
+                return searchController.searchBar.text?.isEmpty ?? true
+    }
+    private var allNotes: [Note] = [] {
+        didSet {
+                filteredNotes = allNotes
+            }
+        }
+    private var filteredNotes: [Note] = []
     override func viewDidLoad() {
         super.viewDidLoad()
 		loadData()
@@ -84,9 +93,10 @@ class NotesViewController: UIViewController {
 
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		
+        allNotes = Database.getInstance().notes
+        tableView.reloadData()
 		loadData()
-	}
+    }
 
 	func loadData(){
 		var filterPredicate: NSPredicate?
@@ -95,7 +105,7 @@ class NotesViewController: UIViewController {
 		}
 		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
 		if let data = Note.getData(for: filterPredicate, with: [sortDescriptor]) as? [Note]{
-			notes = data + data + data + data + data + data + data + data + data + data + data + data
+			notes = data
 		}
 		tableView.reloadData()
 	}
@@ -126,7 +136,18 @@ class NotesViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
         searchController.delegate = self
+        definesPresentationContext = true
+        searchController.searchResultsUpdater = self
     }
+    func updateSearchResults(for searchController: UISearchController) {
+        //filterContentForSearchText(searchController.searchBar.text!)
+    }
+//    private func filterContentForSearchText(_ searchText: String) {
+//        filteredNotes = allNotes.filter { (note: Note) -> Bool in
+//        return .name!.lowercased().contains(searchText.lowercased())
+//        }
+//        tableView.reloadData()
+//    }
     
     @IBAction func createNewNoteClicked(_ sender: UIButton) {
         
@@ -143,14 +164,18 @@ extension NotesViewController: UISearchControllerDelegate, UISearchBarDelegate {
 
 extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return notes.count
+        if isSearchBarEmpty {
+            return allNotes.count
+        } else {
+            return filteredNotes.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "note", for: indexPath) as! NotesTableViewCell
-		let note = notes[indexPath.row]
-		cell.noteTitle?.text = note.noteId?.uuidString
-		return cell
+        let note = notes[indexPath.row]
+        cell.noteTitle?.text = note.noteId?.uuidString
+        return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
