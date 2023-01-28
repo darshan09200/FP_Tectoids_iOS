@@ -44,4 +44,14 @@ public extension TimeInterval{
 		let formattedString = formatter.string(from: TimeInterval(self))!
 		return formattedString
 	}
+	
+}
+
+extension Date{
+	func format() -> String{
+		let dateFormatterGet = DateFormatter()
+		dateFormatterGet.dateFormat = "MMM dd yyyy, HH:mm:ss"
+		
+		return dateFormatterGet.string(from: self)
+	}
 }

@@ -15,7 +15,8 @@ class AddTaskViewController: UIViewController {
 	@IBOutlet weak var taskDescription: UITextView!
 	@IBOutlet weak var taskDate: UIDatePicker!
 	
-	var parentTask: Tasks?
+	var hasAdded = false
+	
 	var currentTask: Tasks?
 	
 	var reloadData: () -> Void = {}
@@ -42,10 +43,13 @@ class AddTaskViewController: UIViewController {
 				navBar.topItem?.title = "View Task"
 				
 				navBar.topItem?.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(onCloseTap))
-			}else{
-				navBar.topItem?.title = "Edit Task"
-				
-				
+			}else if let title = task.title{
+				if title.isEmpty{
+					navBar.topItem?.title = "Add Task"
+				} else {
+					navBar.topItem?.title = "Edit Task"
+					
+				}
 			}
 		}
 		
@@ -63,6 +67,14 @@ class AddTaskViewController: UIViewController {
 		taskDate.minimumDate = Date.now
     }
     
+	override func viewWillDisappear(_ animated: Bool) {
+		if !hasAdded, let task = currentTask, task.title!.isEmpty{
+			TaskList.context.delete(task)
+			Database.getInstance().saveData()
+			reloadData()
+		}
+		super.viewWillDisappear(animated)
+	}
 	
 	@objc func keyboardWillShow(notification: NSNotification) {
 		guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
@@ -96,16 +108,12 @@ class AddTaskViewController: UIViewController {
 			alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 			self.present(alert, animated: true, completion: nil)
 		}else{
-			if currentTask == nil{
-				currentTask	= Tasks()
-				currentTask?.taskId = UUID()
-				currentTask?.parentTask = parentTask?.taskId
-			}
 			currentTask?.title = title
 			currentTask?.content = taskDescription.attributedText.getHtml()
 			currentTask?.dueDate = taskDate.date
 			currentTask?.updatedAt = Date.now			
 			Database.getInstance().saveData()
+			hasAdded = true
 			reloadData()
 			dismiss(animated: true)
 		}

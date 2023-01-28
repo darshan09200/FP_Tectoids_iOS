@@ -12,19 +12,11 @@ class TaskViewController: UIViewController {
 	
 	@IBOutlet weak var tableView: UITableView!
 	
-	var currentTask: Tasks?
+	var currentTaskList: TaskList?
 	var tasks = [Tasks]()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		
-//		if currentTask == nil {
-//			currentTask = Tasks()
-//
-//			currentTask?.taskId = UUID()
-//			currentTask?.title = "Test"
-//			currentTask?.updatedAt = Date.now
-//		}
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
 		
@@ -37,18 +29,30 @@ class TaskViewController: UIViewController {
 		reloadData()
 	}
 	
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
+		
+		if tasks.count == 0, let currentTaskList = currentTaskList{
+			TaskList.context.delete(currentTaskList)
+			Database.getInstance().saveData()
+		}
+	}
+	
 	func reloadData(){
-		if let currentTask = currentTask{
+		if let currentTaskList = currentTaskList{
 			tasks = Database.getInstance().tasks.filter{ task in
-				if let taskId = task.taskId{
-					return taskId.uuidString == currentTask.taskId!.uuidString
+				if let list = task.list{
+					return list.listId == currentTaskList.listId
 				}
 				return false
 			}
-		} else{
-			tasks = Database.getInstance().tasks
+			
+			if let task = tasks.first{
+				currentTaskList.title = task.title
+				Database.getInstance().saveData()
+			}
 		}
-		print(tasks)
+		
 		tableView.reloadData()
 	}
 	
@@ -75,7 +79,12 @@ class TaskViewController: UIViewController {
 	}
 	@IBAction func addNewTask(_ sender: Any) {
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "AddTask") as! AddTaskViewController
-		controller.parentTask = currentTask
+		let task = Tasks()
+		task.taskId = UUID()
+		task.title = ""
+		task.list = currentTaskList
+		task.updatedAt = Date.now
+		controller.currentTask = task
 		controller.reloadData = self.reloadData
 		self.present(controller, animated: true)
 	}
@@ -121,11 +130,9 @@ extension TaskViewController: UITableViewDelegate, UITableViewDataSource{
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		tableView.deselectRow(at: indexPath, animated: true)
-		print("called this")
 		let task = tasks[indexPath.row]
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "AddTask") as! AddTaskViewController
 		controller.currentTask = task
-		controller.parentTask = currentTask
 		controller.reloadData = self.reloadData
 		self.present(controller, animated: true)
 	}
@@ -155,14 +162,20 @@ extension TaskViewController: TaskDelegate{
 				let alert = UIAlertController(title: "Oops", message: "Task is already completed", preferredStyle: .alert)
 				alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 				self.present(alert, animated: true, completion: nil)
-			}else{
+				return
+			}else if task.parentTask == nil{
 				let nextIndex = index + 1
 				var canCheck = true
+				print(tasks.endIndex)
+				print(tasks.count)
 				if nextIndex < tasks.endIndex{
-					for i in nextIndex...tasks.endIndex-1{
+					for i in nextIndex..<tasks.endIndex{
 						let childTask = tasks[i]
-						if childTask.parentTask!.uuidString == task.taskId!.uuidString{
-							canCheck = canCheck && childTask.isCompleted
+						print(childTask)
+						if childTask.parentTask != nil && task.taskId != nil{
+							if childTask.parentTask!.uuidString == task.taskId!.uuidString{
+								canCheck = canCheck && childTask.isCompleted
+							}
 						}
 						if !canCheck{
 							break
@@ -173,22 +186,45 @@ extension TaskViewController: TaskDelegate{
 					let alert = UIAlertController(title: "Oops", message: "Some child tasks are still pending. Complete them first", preferredStyle: .alert)
 					alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 					self.present(alert, animated: true, completion: nil)
+					return
 				} else {
 					task.isCompleted = true
 				}
-				Database.getInstance().saveData()
-				tableView.reloadData()
+			}else{
+				task.isCompleted = true
 			}
+			Database.getInstance().saveData()
+			tableView.reloadData()
 		}
 	}
 	
 	func convertToChild(cell: TaskCell) {
 		let (task, index) = getTaskData(taskId: cell.id!)
-		print(index)
-		if tasks.indices.contains(index){
-			if tasks.indices.contains(index - 1){
+		if tasks.indices.contains(index), let task = task{
+			if task.isCompleted{
+				let alert = UIAlertController(title: "Oops", message: "Task already completed cant change", preferredStyle: .alert)
+				alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+				self.present(alert, animated: true, completion: nil)
+			}
+			else if tasks.indices.contains(index - 1){
 				let previousTask = tasks[index - 1]
-				task?.parentTask = previousTask.taskId
+				if let taskId = previousTask.parentTask{
+					task.parentTask = taskId
+				} else {
+					task.parentTask = previousTask.taskId
+				}
+				if let taskId = task.taskId{
+					print(taskId)
+					tasks.forEach{ siblingTask in
+						if siblingTask.parentTask != nil{
+							print(siblingTask)
+							if siblingTask.parentTask!.uuidString == taskId.uuidString{
+								print("changed")
+								siblingTask.parentTask = task.parentTask
+							}
+						}
+					}
+				}
 				Database.getInstance().saveData()
 				tableView.reloadData()
 			} else {
@@ -200,24 +236,27 @@ extension TaskViewController: TaskDelegate{
 	func convertToParent(cell: TaskCell) {
 		let (task, index) = getTaskData(taskId: cell.id!)
 		if let task = task, tasks.indices.contains(index){
-			var nextSiblingTasks = [Tasks]()
-			let nextIndex = index + 1
-			if nextIndex < tasks.endIndex{
-				for i in nextIndex...tasks.endIndex{
-					let siblingTask = tasks[i]
-					if siblingTask.taskId!.uuidString == task.taskId!.uuidString{
-						nextSiblingTasks.append(siblingTask)
-					}else{
-						break
+			if task.isCompleted{
+				let alert = UIAlertController(title: "Oops", message: "Task already completed cant change", preferredStyle: .alert)
+				alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+				self.present(alert, animated: true, completion: nil)
+			}
+			else{
+				let nextIndex = index + 1
+				if nextIndex < tasks.endIndex{
+					for i in nextIndex..<tasks.endIndex{
+						let siblingTask = tasks[i]
+						if siblingTask.parentTask != nil && task.parentTask != nil{
+							if siblingTask.parentTask!.uuidString == task.parentTask!.uuidString{
+								siblingTask.parentTask = task.taskId
+							}
+						}
 					}
 				}
+				task.parentTask = nil
+				Database.getInstance().saveData()
+				tableView.reloadData()
 			}
-			task.parentTask = currentTask?.taskId
-			nextSiblingTasks.forEach{siblingTask in
-				siblingTask.parentTask = task.taskId
-			}
-			Database.getInstance().saveData()
-			tableView.reloadData()
 		}
 	}
 }
