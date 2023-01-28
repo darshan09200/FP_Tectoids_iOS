@@ -26,6 +26,9 @@
 		555D9FB329835E8200E3DDC7 /* TextAttachedViewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB029835E8200E3DDC7 /* TextAttachedViewProvider.swift */; };
 		555D9FB429835E8200E3DDC7 /* SubviewTextAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB129835E8200E3DDC7 /* SubviewTextAttachment.swift */; };
 		555D9FB629835EA600E3DDC7 /* AttributedStringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB529835EA600E3DDC7 /* AttributedStringExtensions.swift */; };
+		556A8EC229847F7500A24CF4 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC129847F7500A24CF4 /* PaddedTextField.swift */; };
+		556A8EC42984834C00A24CF4 /* TaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC32984834C00A24CF4 /* TaskViewController.swift */; };
+		556A8EC6298483A300A24CF4 /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC5298483A300A24CF4 /* TaskCell.swift */; };
 		5582CD8029835D2C00B29347 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5582CD7F29835D2C00B29347 /* NoteViewController.swift */; };
 		559686732977648300A59E79 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686722977648300A59E79 /* AppDelegate.swift */; };
 		559686752977648300A59E79 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686742977648300A59E79 /* SceneDelegate.swift */; };
@@ -59,6 +62,9 @@
 		555D9FB029835E8200E3DDC7 /* TextAttachedViewProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextAttachedViewProvider.swift; sourceTree = "<group>"; };
 		555D9FB129835E8200E3DDC7 /* SubviewTextAttachment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubviewTextAttachment.swift; sourceTree = "<group>"; };
 		555D9FB529835EA600E3DDC7 /* AttributedStringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributedStringExtensions.swift; sourceTree = "<group>"; };
+		556A8EC129847F7500A24CF4 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
+		556A8EC32984834C00A24CF4 /* TaskViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskViewController.swift; sourceTree = "<group>"; };
+		556A8EC5298483A300A24CF4 /* TaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
 		5582CD7F29835D2C00B29347 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
 		5596866F2977648300A59E79 /* Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		559686722977648300A59E79 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -100,12 +106,14 @@
 		5582CD7C29835CD900B29347 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				556A8EC5298483A300A24CF4 /* TaskCell.swift */,
 				3337218B297F5C200017DC64 /* NotesTableViewCell.swift */,
 				559686782977648300A59E79 /* Main.storyboard */,
 				559686802977648400A59E79 /* LaunchScreen.storyboard */,
 				5508609B29839D9700F5F4EB /* AttachmentImage.swift */,
 				550860A52984404100F5F4EB /* Extensions.swift */,
 				550860A7298440D400F5F4EB /* AudioPlayer.swift */,
+				556A8EC129847F7500A24CF4 /* PaddedTextField.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -113,6 +121,7 @@
 		5582CD7D29835CF100B29347 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				556A8EC32984834C00A24CF4 /* TaskViewController.swift */,
 				5508609729839B3D00F5F4EB /* ImagePicker.swift */,
 				550860A92984521900F5F4EB /* AudioPicker.swift */,
 				33372189297F551E0017DC64 /* NotesViewController.swift */,
@@ -252,15 +261,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				550860A62984404100F5F4EB /* Extensions.swift in Sources */,
+				556A8EC42984834C00A24CF4 /* TaskViewController.swift in Sources */,
 				559686772977648300A59E79 /* FoldersViewController.swift in Sources */,
 				559686732977648300A59E79 /* AppDelegate.swift in Sources */,
 				3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */,
+				556A8EC6298483A300A24CF4 /* TaskCell.swift in Sources */,
 				550860AA2984521900F5F4EB /* AudioPicker.swift in Sources */,
 				5508609829839B3D00F5F4EB /* ImagePicker.swift in Sources */,
 				5508609C29839D9700F5F4EB /* AttachmentImage.swift in Sources */,
 				550860A42984370100F5F4EB /* RecordViewController.swift in Sources */,
 				555D9FB229835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift in Sources */,
 				5508609E29842BBF00F5F4EB /* ImageInteraction.swift in Sources */,
+				556A8EC229847F7500A24CF4 /* PaddedTextField.swift in Sources */,
 				55086092298391FD00F5F4EB /* Attachment.swift in Sources */,
 				555D9FB629835EA600E3DDC7 /* AttributedStringExtensions.swift in Sources */,
 				550860A8298440D400F5F4EB /* AudioPlayer.swift in Sources */,

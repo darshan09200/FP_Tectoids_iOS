@@ -77,6 +77,33 @@ extension NSAttributedString {
 		modifiedString.trimCharactersInSet(charSet: charSet)
 		return NSAttributedString(attributedString: modifiedString)
 	}
+	
+	class func loadFromHtml(content: String) -> NSAttributedString? {
+		let htmlData = NSString(string: content).data(using: String.Encoding.unicode.rawValue)
+		
+		let options = [NSAttributedString.DocumentReadingOptionKey.documentType:
+						NSAttributedString.DocumentType.html]
+		let attributedText = try? NSMutableAttributedString(data: htmlData ?? Data(),
+															options: options,
+															documentAttributes: nil)
+		return attributedText?.attributedStringByTrimmingCharacterSet(charSet: .newlines)
+	}
+	
+	public func getHtml() -> String?{
+		let attributedText = self
+		let documentAttributes = [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.html]
+		do {
+			let htmlData = try attributedText.data(from: NSMakeRange(0, attributedText.length), documentAttributes:documentAttributes)
+			if let content = String(data:htmlData,
+									encoding:String.Encoding(rawValue: NSUTF8StringEncoding)) {
+				return content
+			}
+		}
+		catch {
+			print("error creating HTML from Attributed String")
+		}
+		return nil
+	}
 }
 
 extension NSMutableAttributedString {

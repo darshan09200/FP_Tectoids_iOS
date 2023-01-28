@@ -14,6 +14,7 @@ class Database {
 	
 	var folders = [Folder]()
 	var notes = [Note]()
+	var tasks = [Tasks]()
 	
 	private init(){
 		loadData()
@@ -26,6 +27,7 @@ class Database {
 	func loadData(){
 		loadFolders()
 		loadNotes()
+		loadTasks()
 	}
 	
 	func loadFolders(){
@@ -37,6 +39,12 @@ class Database {
 	func loadNotes(){
 		if let notes = Note.getData() as? [Note]{
 			self.notes = notes
+		}
+	}
+	
+	func loadTasks(){
+		if let tasks = Tasks.getData() as? [Tasks]{
+			self.tasks = tasks
 		}
 	}
 	
