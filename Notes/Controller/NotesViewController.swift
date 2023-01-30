@@ -535,22 +535,30 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 		moveToCategory.image = UIImage(systemName: "folder")
 		
 		let delete = UIContextualAction(style: .destructive, title: "Delete") { (_, _, completion) in
-			if self.segmentControl.selectedSegmentIndex == 0 {
-				var note = self.notes[indexPath.section].children[indexPath.row]
-				if self.isFiltering{
-					note = self.filteredNotes[indexPath.row]
+			let alert = UIAlertController(title: nil, message: "Are you sure you want to delete the \(self.segmentControl.selectedSegmentIndex == 0 ? "note" : "task")", preferredStyle: .actionSheet)
+			alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+			alert.addAction(UIAlertAction(title: "Delete", style: .destructive){
+				_ in
+				if self.segmentControl.selectedSegmentIndex == 0 {
+					var note = self.notes[indexPath.section].children[indexPath.row]
+					if self.isFiltering{
+						note = self.filteredNotes[indexPath.row]
+					}
+					Note.context.delete(note)
+				}else{
+					var task = self.taskList[indexPath.section].children[indexPath.row]
+					if self.isFiltering{
+						task = self.filteredTaskList[indexPath.row]
+					}
+					TaskList.context.delete(task)
 				}
-				Note.context.delete(note)
-			}else{
-				var task = self.taskList[indexPath.section].children[indexPath.row]
-				if self.isFiltering{
-					task = self.filteredTaskList[indexPath.row]
-				}
-				TaskList.context.delete(task)
-			}
+				Database.getInstance().saveData()
+				self.loadData()
+			})
+			
+			self.present(alert, animated: true, completion: nil)
+			
 			completion(true)
-			Database.getInstance().saveData()
-			self.loadData()
 		}
 		delete.image = UIImage(systemName: "trash")
 		actions.append(delete)
