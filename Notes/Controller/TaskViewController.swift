@@ -320,6 +320,11 @@ extension TaskViewController: TaskDelegate{
 			let groupTask = tasks[indexPath.section]
 			if indexPath.row > -1 {
 				groupTask.children[indexPath.row].isCompleted = !groupTask.children[indexPath.row].isCompleted
+				if groupTask.children[indexPath.row].isCompleted{
+					NotificationConfig.instance.removeNotification(taskId: groupTask.children[indexPath.row].taskId!.uuidString)
+				} else {
+					NotificationConfig.instance.setupNotification(task: groupTask.children[indexPath.row])
+				}
 			} else {
 				if groupTask.header.isCompleted {
 					let actions = [
@@ -328,7 +333,7 @@ extension TaskViewController: TaskDelegate{
 							groupTask.header.isCompleted = false
 							Database.getInstance().saveData()
 							self.reloadData()
-							self.reloadData()
+							NotificationConfig.instance.setupNotification(task: groupTask.header)
 						}
 					]
 					showAlert("Are you sure you want to mark this is pending as all the sub tasks are completed?", actions: actions)
@@ -338,6 +343,7 @@ extension TaskViewController: TaskDelegate{
 					groupTask.children.forEach{canCheck = canCheck && $0.isCompleted}
 					if canCheck{
 						groupTask.header.isCompleted = true
+						NotificationConfig.instance.removeNotification(taskId: groupTask.header.taskId!.uuidString)
 					} else{
 						showAlert("Some child tasks are still pending. Complete them first")
 					}

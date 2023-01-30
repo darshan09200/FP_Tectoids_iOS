@@ -148,7 +148,7 @@ class AddTaskViewController: UIViewController {
 			currentTask?.content = taskDescription.attributedText.getHtml()
 			currentTask?.dueDate = taskDate.date
 			currentTask?.updatedAt = Date.now
-			setupNotification(task: currentTask!)
+			NotificationConfig.instance.setupNotification(task: currentTask!)
 			Database.getInstance().saveData()
 			hasAdded = true
 			dismiss(animated: true)
@@ -167,25 +167,6 @@ class AddTaskViewController: UIViewController {
 		alert.addAction(UIAlertAction(title: "Keep Task", style: .cancel))
 		self.present(alert, animated: true)
 				
-	}
-	
-	func setupNotification(task: Task){
-		let fiveMins = Calendar.current.date(byAdding: .minute, value: -AddTaskViewController.MIN_DIFFERENCE, to: task.dueDate!)!
-		
-		let content = UNMutableNotificationContent()
-		content.title = task.title!
-		content.subtitle = "Your task is due"
-		content.categoryIdentifier = NotificationIdentifier.Category.task
-		let data = NotificationTemplate(identifier: task.taskId!.uuidString, notificationContent: content, date: fiveMins)
-		
-		NotificationConfig.instance.createNotification(data: data)
-		
-		let notCompleteContent = UNMutableNotificationContent()
-		notCompleteContent.title = task.title!
-		notCompleteContent.subtitle = "Your task couldn't be completed as there are some pending child tasks"
-		notCompleteContent.categoryIdentifier = NotificationIdentifier.Category.taskIncomplete
-		let notCompleteData = NotificationTemplate(identifier: "\(task.taskId!.uuidString)_incomplete", notificationContent: notCompleteContent, date: Calendar.current.date(byAdding: .minute, value: 1, to: fiveMins)!)
-		NotificationConfig.instance.createNotification(data: notCompleteData)
 	}
 }
 
