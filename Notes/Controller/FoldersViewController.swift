@@ -7,6 +7,12 @@
 
 import UIKit
 
+enum Sort: Int, CaseIterable{
+	case title
+	case date
+	case count
+}
+
 class FoldersViewController: UIViewController, UISearchResultsUpdating {
 	
 	private let searchController = UISearchController()
@@ -16,13 +22,23 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 	@IBOutlet weak var sortMenu: UIBarButtonItem!
 	
 	@IBOutlet weak var folderTable: UITableView!
-	//sort menu
-	let menu = UIMenu(title: "", options: .displayInline, children: [
-		UIAction(title: "Sort By Title",
-				 image: UIImage(systemName: "a.square.fill")) { action in
-					 // Perform action
-				 }
-		
+	
+	lazy var titleAction = UIAction(title: "Title") { action in
+		self.onSortChange(.title)
+	}
+	
+	lazy var dateAction = UIAction(title: "Created Date") { action in
+		self.onSortChange(.date)
+	}
+	
+	lazy var countAction = UIAction(title: "Count") { action in
+		self.onSortChange(.count)
+	}
+	
+	lazy var menu = UIMenu(title: "", options: .singleSelection, children: [
+		titleAction,
+		dateAction,
+		countAction
 	])
 	
 	private var isFiltering: Bool {
@@ -31,12 +47,48 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 	
 	private var filteredFolders = [Folder]()
 	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		folderTable.delegate = self
+		folderTable.dataSource = self
+		setActionState()
+		self.sortMenu.menu = menu
+		configureSearchBar()
+	}
+	
 	override func viewWillAppear(_ animated: Bool) {
 		folderTable.reloadData()
 	}
 	
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
+		
+		UserDefaults.standard.synchronize()
+	}
+	
 	func getFolders() -> [Folder]{
-		return Database.getInstance().folders
+		var sortPredicate = [NSSortDescriptor]()
+		let currentSort = getCurrentSort()
+		if currentSort == .title || currentSort == .none{
+			sortPredicate.append(NSSortDescriptor(key: "name", ascending: false, selector: #selector(NSString.localizedStandardCompare)))
+		} else if currentSort == .date{
+			sortPredicate.append(NSSortDescriptor(key: "createdOn", ascending: false))
+		}
+		var data = [Folder]()
+		if let folders = Folder.getData(with: sortPredicate) as? [Folder]{
+			if currentSort == .count{
+				print("inside count")
+				data = folders.sorted{
+					(($0.notes?.count ?? 0 ) + ($0.tasks?.count ?? 0)) >
+					(($1.notes?.count ?? 0 ) + ($1.tasks?.count ?? 0))
+				}
+			} else {
+				data = folders
+			}
+		}
+		
+		return data
 	}
 	
 	func showFolderNameAlert(for indexPath: IndexPath? = nil){
@@ -57,14 +109,16 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 					folder = self.getFolders()[indexPath.row]
 				} else{
 					folder = Folder()
+					folder.createdOn = Date.now
 				}
 				folder.name = textField.text!
 				Database.getInstance().saveData()
-				if let indexPath = indexPath{
-					self.folderTable.reloadRows(at: [indexPath], with: .automatic)
-				} else{
-					self.folderTable.insertRows(at: [IndexPath(row: self.getFolders().count - 1, section: 0)], with: .automatic)
-				}
+//				if let indexPath = indexPath{
+//					self.folderTable.reloadRows(at: [indexPath], with: .automatic)
+//				} else{
+//					self.folderTable.insertRows(at: [IndexPath(row: self.getFolders().count - 1, section: 0)], with: .automatic)
+//				}
+				self.folderTable.reloadData()
 			})
 		
 		
@@ -80,6 +134,30 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 		alert.addAction(saveAction)
 		
 		self.present(alert, animated: true, completion: nil)
+	}
+	
+	func getCurrentSort() -> Sort?{
+		let sortValue = UserDefaults.standard.integer(forKey: "sort")
+		return Sort(rawValue: sortValue)
+	}
+	
+	func onSortChange(_ sort: Sort){
+		UserDefaults.standard.set(sort.rawValue, forKey: "sort")
+		setActionState()
+		folderTable.reloadData()
+	}
+	
+	func setActionState(){
+		let currentSort = getCurrentSort()
+		switch currentSort{
+			case .date:
+				dateAction.state = .on
+			case .count:
+				countAction.state = .on
+			case .title: fallthrough
+			case .none:
+				titleAction.state = .on
+		}
 	}
 }
 
@@ -158,15 +236,6 @@ extension FoldersViewController:  UITableViewDelegate, UITableViewDataSource{
 		controller.selectedFolder = folder
 		navigationController?.pushViewController(controller, animated: true)
 		
-	}
-	override func viewDidLoad() {
-		super.viewDidLoad()
-		folderTable.delegate = self
-		folderTable.dataSource = self
-		self.sortMenu.menu = menu
-		// self.sortMenu.showsMenuAsPrimaryAction = true
-		//Database.getInstance()
-		configureSearchBar()
 	}
 	
 	@IBAction func addButton(_ sender: Any) {

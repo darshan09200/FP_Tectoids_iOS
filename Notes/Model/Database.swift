@@ -82,11 +82,11 @@ extension NSManagedObject: Fetchable {
 	class func getData(for predicate: NSPredicate? = nil,
 					   with sortDescriptors: [NSSortDescriptor]? = nil) -> [EntityType]?
 	{
-		let request = fetchRequest()
+		let request = NSFetchRequest<EntityType>(entityName: entityName)
 		request.predicate = predicate
 		request.sortDescriptors = sortDescriptors
 		do {
-			return try context.fetch(request) as? [EntityType]
+			return try context.fetch(request)
 		} catch {
 			print("Error saving data \(error.localizedDescription)")
 			return nil
