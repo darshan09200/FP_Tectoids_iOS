@@ -443,19 +443,18 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 						if searchString.length - nextStart > -1 {
 							let remainingString = searchString.attributedSubstring(
 								from: NSRange(location: nextStart, length: searchString.length - nextStart)).string.condenseWhitespace()
-							print(remainingString)
 							
-							remainingText = NSMutableAttributedString(string: "  \(remainingString)", attributes: attributes)
+							remainingText = NSMutableAttributedString(string: "  \(remainingString.isEmpty ? "No additional text" : remainingString)", attributes: attributes)
 						} else {
 							remainingText = NSMutableAttributedString(string: "  No additional text", attributes: attributes)
-						}
-						subtitle.append(remainingText)
-					} else {
+						}					} else {
 						cell.noteTitle.text = "New Note"
 						if let count = note.extras?.attachments.count, count > 0{
 							subtitle.append(NSMutableAttributedString(string: "  \(count) Attachments", attributes: attributes))
 						}
+						subtitle.append(NSMutableAttributedString(string: "  No additional text", attributes: attributes))
 					}
+					print(subtitle)
 					cell.noteDate.attributedText = subtitle
 				}
 			}
@@ -471,7 +470,8 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 				task = filteredTaskList[indexPath.row]
 			}
 			cell.noteTitle?.text = task.title
-			cell.noteDate.text = task.updatedAt?.format()			
+			cell.noteDate.text = task.updatedAt?.format()
+			cell.noteImage.isHidden = true
 		}
 		return cell
 	}
