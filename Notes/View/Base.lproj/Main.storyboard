@@ -126,7 +126,7 @@
                                     <action selector="addButton:" destination="BYZ-38-t0r" id="gS8-6R-RCC"/>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Item" image="arrow.up.arrow.down" catalog="system" id="fwK-bG-2OB"/>
+                            <barButtonItem title="Sort" image="arrow.up.arrow.down" catalog="system" id="fwK-bG-2OB"/>
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
@@ -275,7 +275,7 @@
                                 <edgeInsets key="layoutMargins" top="0.0" left="16" bottom="0.0" right="16"/>
                             </stackView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" sectionIndexMinimumDisplayRowCount="-1" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="0rf-JG-0kC">
-                                <rect key="frame" x="0.0" y="90" width="393" height="665.33333333333337"/>
+                                <rect key="frame" x="0.0" y="90" width="393" height="666"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="note" id="57S-oi-F8R" customClass="NotesTableViewCell" customModule="Notes" customModuleProvider="target">
@@ -342,13 +342,13 @@
                                 </connections>
                             </tableView>
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zkN-LS-IRU">
-                                <rect key="frame" x="0.0" y="755.33333333333337" width="393" height="96.666666666666629"/>
+                                <rect key="frame" x="0.0" y="756" width="393" height="96"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="7yt-T9-7U4">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="97"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="96"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 Notes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SRr-gG-sPB">
-                                            <rect key="frame" x="0.0" y="22.333333333333258" width="393" height="18"/>
+                                            <rect key="frame" x="0.0" y="22.333333333333371" width="393" height="18"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <nil key="highlightedColor"/>
@@ -396,11 +396,14 @@
                         </constraints>
                     </view>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="Notes" id="Ti2-RD-qYS"/>
+                    <navigationItem key="navigationItem" title="Notes" id="Ti2-RD-qYS">
+                        <barButtonItem key="rightBarButtonItem" title="Sort" image="arrow.up.arrow.down" catalog="system" id="TnM-y7-zY2"/>
+                    </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="countLbl" destination="SRr-gG-sPB" id="k6y-9n-mtd"/>
                         <outlet property="segmentControl" destination="MM3-SN-FCV" id="gb3-jp-98g"/>
+                        <outlet property="sortMenu" destination="TnM-y7-zY2" id="GSu-Xg-28Y"/>
                         <outlet property="tableView" destination="0rf-JG-0kC" id="BCK-ux-D9o"/>
                     </connections>
                 </viewController>

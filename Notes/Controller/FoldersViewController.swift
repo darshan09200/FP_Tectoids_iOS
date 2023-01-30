@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum Sort: Int, CaseIterable{
+enum SortFolder: Int, CaseIterable{
 	case title
 	case date
 	case count
@@ -137,13 +137,13 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 		self.present(alert, animated: true, completion: nil)
 	}
 	
-	func getCurrentSort() -> Sort?{
-		let sortValue = UserDefaults.standard.integer(forKey: "sort")
-		return Sort(rawValue: sortValue)
+	func getCurrentSort() -> SortFolder?{
+		let sortValue = UserDefaults.standard.integer(forKey: "sortFolder")
+		return SortFolder(rawValue: sortValue)
 	}
 	
-	func onSortChange(_ sort: Sort){
-		UserDefaults.standard.set(sort.rawValue, forKey: "sort")
+	func onSortChange(_ sort: SortFolder){
+		UserDefaults.standard.set(sort.rawValue, forKey: "sortFolder")
 		setActionState()
 		folderTable.reloadData()
 	}

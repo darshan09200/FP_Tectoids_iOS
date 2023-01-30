@@ -26,6 +26,11 @@ struct GroupedTaskList{
 	var children = [TaskList]()
 }
 
+enum SortNotes: Int, CaseIterable{
+	case title
+	case date
+}
+
 class NotesViewController: UIViewController {
 	
 	@IBOutlet weak var segmentControl: UISegmentedControl!
@@ -35,7 +40,8 @@ class NotesViewController: UIViewController {
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var countLbl: UILabel!
 	
-
+	@IBOutlet weak var sortMenu: UIBarButtonItem!
+	
 	var selectedFolder: Folder?
 	private var notes = [GroupedNotes]()
 	private var filteredNotes: [Note] = []
@@ -47,9 +53,25 @@ class NotesViewController: UIViewController {
 		return !(searchController.searchBar.text?.isEmpty ?? true)
 	}
 	
+	lazy var titleAction = UIAction(title: "Title") { action in
+		self.onSortChange(.title)
+	}
+	
+	lazy var dateAction = UIAction(title: "Created Date") { action in
+		self.onSortChange(.date)
+	}
+	
+	lazy var menu = UIMenu(title: "", options: .singleSelection, children: [
+		titleAction,
+		dateAction
+	])
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		loadData()
+		
+		setActionState()
+		self.sortMenu.menu = menu
 		
 		configureSearchBar()
 		
@@ -70,9 +92,29 @@ class NotesViewController: UIViewController {
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		
-		print("called")
 		loadData()
+	}
+	
+	func getCurrentSort() -> SortNotes?{
+		let sortValue = UserDefaults.standard.integer(forKey: "sortNotes")
+		return SortNotes(rawValue: sortValue)
+	}
+	
+	func onSortChange(_ sort: SortNotes){
+		UserDefaults.standard.set(sort.rawValue, forKey: "sortNotes")
+		setActionState()
+		loadData()
+	}
+	
+	func setActionState(){
+		let currentSort = getCurrentSort()
+		switch currentSort{
+			case .title:
+				titleAction.state = .on
+			case .date: fallthrough
+			case .none:
+				dateAction.state = .on
+		}
 	}
 	
 	func getIntervals () -> [(String, Date)] {
@@ -106,6 +148,7 @@ class NotesViewController: UIViewController {
 			filterFolderPredicate = NSPredicate(format: "parentFolder.folderId == %@", selectedFolder.folderId! as CVarArg)
 		}
 		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
+		let currentSort = getCurrentSort()
 		if let data = Note.getData(for: filterNotesPredicate, with: [sortDescriptor]) as? [Note]{
 			var groupedData = getIntervals().map{GroupedNotes(headerText: $0.0, date: $0.1)}
 			for index in groupedData.indices{
@@ -116,9 +159,20 @@ class NotesViewController: UIViewController {
 					if item.headerText == Interval.today.rawValue ||
 						item.headerText == Interval.yesterday.rawValue{
 						return Calendar.current.isDate($0.updatedAt!, inSameDayAs: item.date)
-					} else{
+					} else {
 						let compareResult = Calendar.current.compare($0.updatedAt!, to: item.date, toGranularity: .day)
 						return compareResult == .orderedAscending || compareResult == .orderedSame
+					}
+				}
+				
+				groupedData[index].children = groupedData[index].children.sorted{
+					if currentSort == .title {
+						return (NSAttributedString.loadFromHtml(
+							content: $0.content ?? "")?.getLine()?.string.condenseWhitespace() ?? "") <
+								(NSAttributedString.loadFromHtml(
+									content: $1.content ?? "")?.getLine()?.string.condenseWhitespace() ?? "")
+					} else {
+						return $0.updatedAt! > $1.updatedAt!
 					}
 				}
 			}
@@ -139,6 +193,14 @@ class NotesViewController: UIViewController {
 						return compareResult == .orderedAscending || compareResult == .orderedSame
 					}
 				}
+				
+				groupedData[index].children = groupedData[index].children.sorted{
+					if currentSort == .title {
+						return (($0.title ?? "") < ($1.title ?? ""))
+					} else {
+						return $0.updatedAt! > $1.updatedAt!
+					}
+				}
 			}
 			self.taskList = groupedData.filter{$0.children.count > 0}
 		}
@@ -154,13 +216,13 @@ class NotesViewController: UIViewController {
 			if isFiltering{
 				countLbl.text = "\(filteredNotes.count) Notes"
 			} else {
-				countLbl.text = "\(notes.count) Notes"
+				countLbl.text = "\(notes.map{$0.children.count}.reduce(0, +)) Notes"
 			}
 		} else {
 			if isFiltering{
 				countLbl.text = "\(filteredTaskList.count) Tasks"
 			} else {
-				countLbl.text = "\(taskList.count) Tasks"
+				countLbl.text = "\(taskList.map{$0.children.count}.reduce(0, +)) Tasks"
 			}
 		}
 	}
@@ -381,19 +443,18 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 						if searchString.length - nextStart > -1 {
 							let remainingString = searchString.attributedSubstring(
 								from: NSRange(location: nextStart, length: searchString.length - nextStart)).string.condenseWhitespace()
-							print(remainingString)
 							
-							remainingText = NSMutableAttributedString(string: "  \(remainingString)", attributes: attributes)
+							remainingText = NSMutableAttributedString(string: "  \(remainingString.isEmpty ? "No additional text" : remainingString)", attributes: attributes)
 						} else {
 							remainingText = NSMutableAttributedString(string: "  No additional text", attributes: attributes)
-						}
-						subtitle.append(remainingText)
-					} else {
+						}					} else {
 						cell.noteTitle.text = "New Note"
 						if let count = note.extras?.attachments.count, count > 0{
 							subtitle.append(NSMutableAttributedString(string: "  \(count) Attachments", attributes: attributes))
 						}
+						subtitle.append(NSMutableAttributedString(string: "  No additional text", attributes: attributes))
 					}
+					print(subtitle)
 					cell.noteDate.attributedText = subtitle
 				}
 			}
@@ -409,7 +470,8 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 				task = filteredTaskList[indexPath.row]
 			}
 			cell.noteTitle?.text = task.title
-			cell.noteDate.text = task.updatedAt?.format()			
+			cell.noteDate.text = task.updatedAt?.format()
+			cell.noteImage.isHidden = true
 		}
 		return cell
 	}
