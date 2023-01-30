@@ -148,9 +148,7 @@ class NoteViewController: UIViewController {
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		
-		print("appeared")
 		if note == nil{
-			print("added")
 			note = Note()
 			note!.noteId = UUID()
 			note!.createdAt = Date.now
@@ -164,6 +162,8 @@ class NoteViewController: UIViewController {
 		loadData()
 		
 		maxImageWidth = UIScreen.main.bounds.width - textView.layoutMargins.left - textView.layoutMargins.right
+		
+		textView.becomeFirstResponder()
 	}
 	
 	override func viewWillDisappear(_ animated: Bool) {
@@ -813,7 +813,6 @@ extension NoteViewController: ImagePickerDelegate {
 extension NoteViewController: CLLocationManagerDelegate{
 	func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 		guard let location: CLLocationCoordinate2D = manager.location?.coordinate else { return }
-		print(location)
 		note?.latitude = location.latitude
 		note?.longitude = location.longitude
 	}

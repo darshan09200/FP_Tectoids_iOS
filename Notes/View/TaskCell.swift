@@ -12,14 +12,23 @@ class TaskCell: UITableViewCell {
 	override var indentationLevel: Int{
 		didSet{
 			leftConstraint.constant = CGFloat(indentationLevel) * indentationWidth
+			if indentationLevel > 0 {
+				titleLabel.font = .preferredFont(forTextStyle: .title3)
+			} else {
+				titleLabel.font = .preferredFont(forTextStyle: .title2)
+			}
 		}
 	}
 	
 	@IBOutlet weak var checkButton: UIButton!
-	@IBOutlet weak var textView: UITextView!
 	
+	@IBOutlet weak var titleLabel: UILabel!
+	@IBOutlet weak var subtitleLabel: UILabel!
 	@IBOutlet weak var leftConstraint: NSLayoutConstraint!
 
+	@IBOutlet weak var moveUp: UIButton?
+	@IBOutlet weak var moveDown: UIButton?
+	
 	var delegate: TaskDelegate?
 	var firstLayout = true
 	
@@ -31,7 +40,6 @@ class TaskCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
 		
-		textView.font = .preferredFont(forTextStyle: .body)
 		
 		let swipeRightRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(didRecognizeSwipe))
 		swipeRightRecognizer.numberOfTouchesRequired = 1
@@ -72,9 +80,19 @@ class TaskCell: UITableViewCell {
 		}
 	}
 
+	@IBAction func onMoveUpPress() {
+		delegate?.moveUp(cell: self)
+	}
+	
+	@IBAction func onMoveDownPress() {
+		delegate?.moveDown(cell: self)
+	}
+	
 }
 
 protocol TaskDelegate{
+	func moveUp(cell: TaskCell)
+	func moveDown(cell: TaskCell)
 	func convertToParent(cell: TaskCell)
 	func convertToChild(cell: TaskCell)
 	func toggleChecked(cell: TaskCell)

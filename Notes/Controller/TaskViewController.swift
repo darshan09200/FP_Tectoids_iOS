@@ -32,6 +32,8 @@ class TaskViewController: UIViewController {
 		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+		
+		NotificationCenter.default.addObserver(self, selector: #selector(onNotificationReceived), name: Notification.Name(rawValue: NotificationIdentifier.Category.task), object: nil)
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -47,8 +49,12 @@ class TaskViewController: UIViewController {
 	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		
-		if tasks.count == 0, let currentTaskList = currentTaskList{
-			TaskList.context.delete(currentTaskList)
+		if let currentTaskList = currentTaskList{
+			if tasks.count == 0{
+				TaskList.context.delete(currentTaskList)
+			} else {
+				currentTaskList.updatedAt = Date.now
+			}
 			Database.getInstance().saveData()
 		}
 	}
@@ -109,6 +115,10 @@ class TaskViewController: UIViewController {
 		tableView.scrollIndicatorInsets = contentInsets
 	}
 	
+	@objc func onNotificationReceived(){
+		reloadData()
+	}
+	
 	func navigateToNewTask(){
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "AddTask") as! AddTaskViewController
 		let task = Task()
@@ -167,12 +177,30 @@ extension TaskViewController: UITableViewDelegate, UITableViewDataSource{
 			cell = tableView.dequeueReusableCell(withIdentifier: "task", for: indexPath) as! TaskCell
 		} else  {
 			cell = tableView.dequeueReusableCell(withIdentifier: "header") as! TaskCell
+			print(cell)
 			let tapRecognizer = HeaderTapGestureRecognizer(target: self, action: #selector(onHeaderTap))
 			tapRecognizer.indexPath = IndexPath(row: -1, section: section)
 			cell.addGestureRecognizer(tapRecognizer)
+			
+			if section == 0{
+				cell.moveUp?.isHidden = true
+			}
+			if section >= tasks.count - 1{
+				cell.moveDown?.isHidden = true
+			}
 		}
 		cell.delegate = self
-		cell.textView.text = task.title
+		cell.titleLabel.text = task.title
+		if let date = task.dueDate{
+			cell.subtitleLabel.isHidden = false
+			var text = "Due on \(date.fullDate())"
+			if date < Date.now{
+				text = "Was \(text)"
+			}
+			cell.subtitleLabel.text = text
+		} else {
+			cell.subtitleLabel.isHidden = true
+		}
 		cell.id = task.taskId?.uuidString
 		cell.isCompleted = task.isCompleted
 		cell.indentationLevel = task.parentTask != nil ? 1 : 0
@@ -216,6 +244,7 @@ extension TaskViewController: UITableViewDelegate, UITableViewDataSource{
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "AddTask") as! AddTaskViewController
 		controller.currentTask = task
 		controller.reloadData = self.reloadData
+		controller.deleteTask = self.deleteTask
 		self.present(controller, animated: true)
 	}
 	
@@ -258,6 +287,18 @@ extension TaskViewController: UITableViewDelegate, UITableViewDataSource{
 
 
 extension TaskViewController: TaskDelegate{
+	
+	func deleteTask(_ task: Task?){
+		if let task = task{
+			let indexPath = getTaskData(taskId: task.taskId!.uuidString)
+			if indexPath.section > -1 && indexPath.row > -1 {
+				Task.context.delete(task)
+				Database.getInstance().saveData()
+				refreshData()
+				tableView.deleteRows(at: [indexPath], with: .automatic)
+			}
+		}
+	}
 	
 	func showAlert(_ message: String, actions: [UIAlertAction]? = nil){
 		let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
@@ -351,6 +392,32 @@ extension TaskViewController: TaskDelegate{
 			Database.getInstance().saveData()
 			refreshData()
 			refreshCheckedStatusFor(section: indexPath.section, shouldReload: true)
+		}
+	}
+	
+	func moveUp(cell: TaskCell) {
+		let indexPath = getTaskData(taskId: cell.id!)
+		if indexPath.section > 0 {
+			let currentTask = tasks[indexPath.section]
+			let previousTask = tasks[indexPath.section - 1]
+			previousTask.header.rowNo += 1
+			currentTask.header.rowNo -= 1
+			Database.getInstance().saveData()
+			reloadData()
+//			tableView.moveSection(indexPath.section, toSection: indexPath.section - 1)
+		}
+	}
+	
+	func moveDown(cell: TaskCell) {
+		let indexPath = getTaskData(taskId: cell.id!)
+		if indexPath.section < tasks.endIndex - 1 {
+			let currentTask = tasks[indexPath.section]
+			let nextTask = tasks[indexPath.section + 1]
+			nextTask.header.rowNo -= 1
+			currentTask.header.rowNo += 1
+			Database.getInstance().saveData()
+			reloadData()
+//			tableView.moveSection(indexPath.section, toSection: indexPath.section + 1)
 		}
 	}
 }

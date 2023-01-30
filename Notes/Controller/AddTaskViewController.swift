@@ -6,17 +6,21 @@
 //
 
 import UIKit
+import UserNotifications
 
 class AddTaskViewController: UIViewController {
 
+	static let MIN_DIFFERENCE = 5
+	
 	@IBOutlet weak var navBar: UINavigationBar!
 	@IBOutlet weak var scrollView: UIScrollView!
 	@IBOutlet weak var taskTitle: PaddedTextField!
 	@IBOutlet weak var taskDescription: UITextView!
 	@IBOutlet weak var taskDate: UIDatePicker!
 	
+	@IBOutlet weak var deleteTaskBtn: UIButton!
 	private var hasAnythingChanged: Bool{
-		if let task = currentTask{
+		if let task = currentTask, !task.title!.isEmpty{
 			if task.isCompleted {
 				return true
 			}
@@ -25,11 +29,20 @@ class AddTaskViewController: UIViewController {
 		return false
 	}
 	
+	private var isDueDateFuture: Bool {
+		if let task = currentTask, !task.title!.isEmpty, let date = task.dueDate{
+			print(date)
+			return date > Date.now
+		}
+		return true
+	}
+	
 	var hasAdded = false
 	
 	var currentTask: Task?
 	
 	var reloadData: () -> Void = {}
+	var deleteTask: (_ task: Task?) -> Void = {_ in }
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,14 +66,15 @@ class AddTaskViewController: UIViewController {
 				taskDescription.isEditable = false
 				taskDate.isEnabled = false
 				navBar.topItem?.title = "View Task"
-				
+				deleteTaskBtn.isHidden = true
 				navBar.topItem?.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(onCloseTap))
 			}else if let title = task.title{
 				if title.isEmpty{
 					navBar.topItem?.title = "Add Task"
+					deleteTaskBtn.isHidden = true
 				} else {
 					navBar.topItem?.title = "Edit Task"
-					
+					deleteTaskBtn.isHidden = false
 				}
 			}
 		}
@@ -80,7 +94,7 @@ class AddTaskViewController: UIViewController {
 			taskDate.date = date
 			taskDate.minimumDate = date
 		} else {
-			taskDate.minimumDate = Date.now
+			taskDate.minimumDate = Calendar.current.date(byAdding: .minute, value: AddTaskViewController.MIN_DIFFERENCE, to: Date.now)
 		}
 		
 		taskTitle.becomeFirstResponder()
@@ -125,39 +139,78 @@ class AddTaskViewController: UIViewController {
 			let alert = UIAlertController(title: "Oops", message: "Title cant be empty", preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 			self.present(alert, animated: true, completion: nil)
-		} else if let minDate = Calendar.current.date(byAdding: .hour, value: 1, to: Date.now), taskDate.date < minDate {
-			let alert = UIAlertController(title: "Oops", message: "Due date should be atleast 1 hour from current time", preferredStyle: .alert)
+		} else if let minDate = Calendar.current.date(byAdding: .minute, value: AddTaskViewController.MIN_DIFFERENCE, to: Date.now), taskDate.date < minDate {
+			let alert = UIAlertController(title: "Oops", message: "Due date should be atleast \(AddTaskViewController.MIN_DIFFERENCE) minutes from current time", preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 			self.present(alert, animated: true, completion: nil)
 		} else {
 			currentTask?.title = title
 			currentTask?.content = taskDescription.attributedText.getHtml()
 			currentTask?.dueDate = taskDate.date
-			currentTask?.updatedAt = Date.now			
+			currentTask?.updatedAt = Date.now
+			setupNotification(task: currentTask!)
 			Database.getInstance().saveData()
 			hasAdded = true
-			reloadData()
 			dismiss(animated: true)
+			reloadData()
 		}
 	}
 	
-	@IBAction func onDateChanged(_ sender: UIDatePicker) {
-		print(sender.date)
+	@IBAction func onDeletePress() {
+		let additionalMsg = currentTask?.parentTask == nil ? "This is a parent task. Deleting this will delete its subtask too." :""
+		let alert = UIAlertController(title: nil, message: "Are you sure you want to delete this task? \(additionalMsg)", preferredStyle: .actionSheet)
+		alert.addAction(UIAlertAction(title: "Delete Task", style: .destructive) { _ in
+			self.dismiss(animated: true){
+				self.deleteTask(self.currentTask)
+			}
+		})
+		alert.addAction(UIAlertAction(title: "Keep Task", style: .cancel))
+		self.present(alert, animated: true)
+				
+	}
+	
+	func setupNotification(task: Task){
+		let fiveMins = Calendar.current.date(byAdding: .minute, value: -AddTaskViewController.MIN_DIFFERENCE, to: task.dueDate!)!
+		
+		let content = UNMutableNotificationContent()
+		content.title = task.title!
+		content.subtitle = "Your task is due"
+		content.categoryIdentifier = NotificationIdentifier.Category.task
+		let data = NotificationTemplate(identifier: task.taskId!.uuidString, notificationContent: content, date: fiveMins)
+		
+		NotificationConfig.instance.createNotification(data: data)
+		
+		let notCompleteContent = UNMutableNotificationContent()
+		notCompleteContent.title = task.title!
+		notCompleteContent.subtitle = "Your task couldn't be completed as there are some pending child tasks"
+		notCompleteContent.categoryIdentifier = NotificationIdentifier.Category.taskIncomplete
+		let notCompleteData = NotificationTemplate(identifier: "\(task.taskId!.uuidString)_incomplete", notificationContent: notCompleteContent, date: Calendar.current.date(byAdding: .minute, value: 1, to: fiveMins)!)
+		NotificationConfig.instance.createNotification(data: notCompleteData)
 	}
 }
 
 extension AddTaskViewController: UIAdaptivePresentationControllerDelegate {
 	
 	public func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
-		return !hasAnythingChanged
+		return !hasAnythingChanged && isDueDateFuture
 	}
 	
 	public func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
-		let alert = UIAlertController(title: nil, message: "Are you sure you want to discard changes", preferredStyle: .actionSheet)
-		alert.addAction(UIAlertAction(title: "Discard Changes", style: .destructive) { _ in
-			self.dismiss(animated: true)
-		})
-		alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel))
+		var message = "Are you sure you want to discard changes"
+		var actions = [UIAlertAction]()
+		var style: UIAlertController.Style = .actionSheet
+		if !isDueDateFuture {
+			message = "Your due date has already past. Please select a future date"
+			actions.append(UIAlertAction(title: "Ok", style: .cancel))
+			style = .alert
+		} else {
+			actions.append(UIAlertAction(title: "Discard Changes", style: .destructive) { _ in
+				self.dismiss(animated: true)
+			})
+			actions.append(UIAlertAction(title: "Keep Editing", style: .cancel))
+		}
+		let alert = UIAlertController(title: nil, message: message, preferredStyle: style)
+		actions.forEach{alert.addAction($0)}
 		self.present(alert, animated: true)
 	
 	}
