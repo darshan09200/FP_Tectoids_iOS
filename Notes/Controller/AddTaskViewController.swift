@@ -15,15 +15,27 @@ class AddTaskViewController: UIViewController {
 	@IBOutlet weak var taskDescription: UITextView!
 	@IBOutlet weak var taskDate: UIDatePicker!
 	
+	private var hasAnythingChanged: Bool{
+		if let task = currentTask{
+			if task.isCompleted {
+				return true
+			}
+			return task.title != taskTitle.text! || task.content != taskDescription.attributedText.getHtml() || task.dueDate! != taskDate.date
+		}
+		return false
+	}
+	
 	var hasAdded = false
 	
-	var currentTask: Tasks?
+	var currentTask: Task?
 	
 	var reloadData: () -> Void = {}
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
         
+		self.presentationController?.delegate = self
+		
 		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -64,7 +76,14 @@ class AddTaskViewController: UIViewController {
 		taskDescription.layer.cornerRadius = 4.0;
 		taskDescription.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
 		
-		taskDate.minimumDate = Date.now
+		if let task = currentTask, let date = task.dueDate{
+			taskDate.date = date
+			taskDate.minimumDate = date
+		} else {
+			taskDate.minimumDate = Date.now
+		}
+		
+		taskTitle.becomeFirstResponder()
     }
     
 	override func viewWillDisappear(_ animated: Bool) {
@@ -90,8 +109,7 @@ class AddTaskViewController: UIViewController {
 	
 	@objc func keyboardWillHide(notification: NSNotification) {
 		let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
-		
-		
+				
 		// reset back the content inset to zero after keyboard is gone
 		scrollView.contentInset = contentInsets
 		scrollView.scrollIndicatorInsets = contentInsets
@@ -107,7 +125,11 @@ class AddTaskViewController: UIViewController {
 			let alert = UIAlertController(title: "Oops", message: "Title cant be empty", preferredStyle: .alert)
 			alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
 			self.present(alert, animated: true, completion: nil)
-		}else{
+		} else if let minDate = Calendar.current.date(byAdding: .hour, value: 1, to: Date.now), taskDate.date < minDate {
+			let alert = UIAlertController(title: "Oops", message: "Due date should be atleast 1 hour from current time", preferredStyle: .alert)
+			alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+			self.present(alert, animated: true, completion: nil)
+		} else {
 			currentTask?.title = title
 			currentTask?.content = taskDescription.attributedText.getHtml()
 			currentTask?.dueDate = taskDate.date
@@ -121,5 +143,22 @@ class AddTaskViewController: UIViewController {
 	
 	@IBAction func onDateChanged(_ sender: UIDatePicker) {
 		print(sender.date)
+	}
+}
+
+extension AddTaskViewController: UIAdaptivePresentationControllerDelegate {
+	
+	public func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+		return !hasAnythingChanged
+	}
+	
+	public func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
+		let alert = UIAlertController(title: nil, message: "Are you sure you want to discard changes", preferredStyle: .actionSheet)
+		alert.addAction(UIAlertAction(title: "Discard Changes", style: .destructive) { _ in
+			self.dismiss(animated: true)
+		})
+		alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel))
+		self.present(alert, animated: true)
+	
 	}
 }

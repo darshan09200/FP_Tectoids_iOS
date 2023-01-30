@@ -68,6 +68,17 @@ public extension NSMutableAttributedString {
 public extension String {
 	
 	static let paragraphSeparator = "\u{2029}"
+	static let lineSeparator = "\u{2028}"
+	
+	func condenseWhitespace() -> String {
+		let components = self
+			.replacingOccurrences(of: "\n", with: " ")
+			.replacingOccurrences(of: "\r", with: " ")
+			.replacingOccurrences(of: String.paragraphSeparator, with: " ")
+			.replacingOccurrences(of: String.lineSeparator, with: " ")
+			.components(separatedBy: .whitespacesAndNewlines)
+		return components.filter { !$0.isEmpty }.joined(separator: " ")
+	}
 	
 }
 
@@ -103,6 +114,37 @@ extension NSAttributedString {
 			print("error creating HTML from Attributed String")
 		}
 		return nil
+	}
+	
+	func getLine(at cursorPosition: Int = 0) -> NSAttributedString{
+		return attributedSubstring(from: getLineRange())
+	}
+	
+	func getLineRange (at cursorPosition: Int = 0) -> NSRange{
+		let attributedText = NSMutableAttributedString(attributedString: self)
+		let actualString = attributedText.string
+		if actualString.count == 0 {
+			return NSRange(location: 0, length: 1)
+		}
+		let previousString = actualString.prefix(cursorPosition)
+		let startIndex = previousString.lastIndex{ $0.isNewline }
+		
+		let postString = actualString[actualString.index(actualString.startIndex, offsetBy: cursorPosition)...]
+		let endIndex = postString.firstIndex{ $0.isNewline }
+		
+		var startLocation = 0
+		var endLocation = actualString.count
+		
+		if let startIndex = startIndex{
+			startLocation = previousString.distance(from: previousString.startIndex, to: startIndex) + 1
+		}
+		if let endIndex = endIndex{
+			endLocation = cursorPosition + postString.distance(from: postString.startIndex, to: endIndex)
+		}
+		startLocation = min(max(actualString.count - 1, 0), startLocation)
+		endLocation = min(actualString.count, endLocation)
+		
+		return NSRange(location: startLocation, length: endLocation - startLocation)
 	}
 }
 

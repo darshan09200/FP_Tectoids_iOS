@@ -10,12 +10,12 @@ import CoreData
 class Database {
 	static let instance = Database()
 	
-	let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+	private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 	
-	var folders = [Folder]()
-	var notes = [Note]()
-	var taskList = [TaskList]()
-	var tasks = [Tasks]()
+	private(set) var folders = [Folder]()
+	private(set) var notes = [Note]()
+	private(set) var taskList = [TaskList]()
+	private(set) var tasks = [Task]()
 	
 	private init(){
 		loadData()
@@ -50,7 +50,7 @@ class Database {
 	}
 	
 	func loadTasks(){
-		if let tasks = Tasks.getData() as? [Tasks]{
+		if let tasks = Task.getData() as? [Task]{
 			self.tasks = tasks
 		}
 	}

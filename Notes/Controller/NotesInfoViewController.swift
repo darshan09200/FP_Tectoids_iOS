@@ -6,24 +6,47 @@
 //
 
 import UIKit
+import MapKit
 
 class NotesInfoViewController: UIViewController {
 
-    override func viewDidLoad() {
+	@IBOutlet weak var titleLabel: UILabel!
+	@IBOutlet weak var subTitleLabel: UILabel!
+	
+	@IBOutlet weak var mapView: UIView!
+	@IBOutlet weak var map: MKMapView!
+	
+	var currentNote: Note?
+	
+	override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
+		mapView.layer.cornerRadius = 8
+
+		if let note = currentNote{
+			titleLabel.text = NSAttributedString.loadFromHtml(content: note.content ?? "")?.getLine().string
+			
+			subTitleLabel.text = note.updatedAt?.fullDate()
+			
+			if note.latitude > -89 && note.latitude < 89 && note.longitude > -179 && note.longitude < 179{
+				let annotation = MKPointAnnotation()
+				annotation.coordinate = CLLocationCoordinate2D(latitude: note.latitude, longitude: note.longitude)
+				map.addAnnotation(annotation)
+				
+				let camera = MKMapCamera()
+				camera.centerCoordinate = annotation.coordinate
+				camera.centerCoordinateDistance = 5000
+				map.setCamera(camera, animated: false)
+			} else{
+				mapView.isHidden = true
+			}
+		}
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+	@IBAction func onDeletePress() {
+	}
+	
+	@IBAction func onCancelPress(_ sender: Any) {
+		self.dismiss(animated: true)
+	}
 }

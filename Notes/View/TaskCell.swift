@@ -23,7 +23,7 @@ class TaskCell: UITableViewCell {
 	var delegate: TaskDelegate?
 	var firstLayout = true
 	
-	var isChecked = false
+	var isCompleted = false
 	var id: String?
 	
 	
@@ -45,7 +45,7 @@ class TaskCell: UITableViewCell {
     }
 	
 	func refreshImages(){
-		if isChecked{
+		if isCompleted{
 			checkButton.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
 		}else{
 			checkButton.setImage(UIImage(systemName: "circle"), for: .normal)

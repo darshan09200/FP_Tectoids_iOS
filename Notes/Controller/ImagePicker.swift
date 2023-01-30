@@ -66,10 +66,10 @@ open class ImagePicker: NSObject {
 		self.delegate?.didSelect(image: image)
 	}
 	
-	func shareImage(path: String, sourceView: UIView?){
+	func shareFile(path: String, sourceView: UIView?){
 		
-		let imageToShare = [ URL(fileURLWithPath: path) ]
-		let activityViewController = UIActivityViewController(activityItems: imageToShare, applicationActivities: nil)
+		let fileToShare = [ URL(fileURLWithPath: path) ]
+		let activityViewController = UIActivityViewController(activityItems: fileToShare, applicationActivities: nil)
 		activityViewController.popoverPresentationController?.sourceView = sourceView
 		presentationController?.present(activityViewController, animated: true, completion: nil)
 	}
