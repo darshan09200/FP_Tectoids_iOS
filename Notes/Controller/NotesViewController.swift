@@ -550,6 +550,11 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 					if self.isFiltering{
 						task = self.filteredTaskList[indexPath.row]
 					}
+					if let childTasks = task.tasks as? Set<Task>{
+						childTasks.forEach{
+							NotificationConfig.instance.removeNotification(taskId: $0.taskId!.uuidString)
+						}
+					}
 					TaskList.context.delete(task)
 				}
 				Database.getInstance().saveData()
