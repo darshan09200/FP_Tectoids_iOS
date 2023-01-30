@@ -141,6 +141,9 @@ class NotesViewController: UIViewController {
 			self.taskList = groupedData.filter{$0.children.count > 0}
 		}
 		refreshCount()
+		if isFiltering{
+			search(searchController.searchBar.text ?? "")
+		}
 		tableView.reloadData()
 	}
 	
@@ -465,16 +468,13 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 				}
 				TaskList.context.delete(task)
 			}
-			
+			completion(true)
 			Database.getInstance().saveData()
 			self.loadData()
-			// Delete the note from your data source (e.g. an array of notes)
-			tableView.deleteRows(at: [indexPath], with: .fade)
-			completion(true)
 		}
 		delete.image = UIImage(systemName: "trash")
 		actions.append(delete)
-		actions.append(moveToCategory)
+//		actions.append(moveToCategory)
 		if segmentControl.selectedSegmentIndex == 1{
 			actions.append(editAction)
 		}
