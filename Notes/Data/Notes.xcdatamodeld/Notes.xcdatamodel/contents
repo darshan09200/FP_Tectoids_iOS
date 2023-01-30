@@ -2,6 +2,7 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21513" systemVersion="22C65" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Folder" representedClassName="Folder" syncable="YES" codeGenerationType="class">
         <attribute name="createdOn" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="folderId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
         <relationship name="notes" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="parentFolder" inverseEntity="Note"/>
         <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="TaskList" inverseName="parentFolder" inverseEntity="TaskList"/>

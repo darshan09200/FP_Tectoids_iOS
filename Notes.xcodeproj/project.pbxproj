@@ -39,6 +39,7 @@
 		5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5596867B2977648300A59E79 /* Notes.xcdatamodeld */; };
 		5596867F2977648400A59E79 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5596867E2977648400A59E79 /* Assets.xcassets */; };
 		559686822977648400A59E79 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 559686802977648400A59E79 /* LaunchScreen.storyboard */; };
+		55C812332988551F00921428 /* MoveFolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C812322988551F00921428 /* MoveFolderViewController.swift */; };
 		55DA201F297F547E00B1F0B0 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 55DA201E297F547E00B1F0B0 /* .gitignore */; };
 		55FDE993297F4B2700229AC1 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FDE992297F4B2700229AC1 /* Database.swift */; };
 		8F750AF5297F42780051E95C /* NotesInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F750AF4297F42780051E95C /* NotesInfoViewController.swift */; };
@@ -79,6 +80,7 @@
 		5596867E2977648400A59E79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		559686812977648400A59E79 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		559686832977648400A59E79 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		55C812322988551F00921428 /* MoveFolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveFolderViewController.swift; sourceTree = "<group>"; };
 		55DA201E297F547E00B1F0B0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		55FDE992297F4B2700229AC1 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		8F750AF4297F42780051E95C /* NotesInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesInfoViewController.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				550860A32984370100F5F4EB /* RecordViewController.swift */,
 				3304F25B298467FE0068B18F /* AddTaskViewController.swift */,
 				5542060A29881D84005DBA8C /* NotificationConfig.swift */,
+				55C812322988551F00921428 /* MoveFolderViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -277,6 +280,7 @@
 				5508609C29839D9700F5F4EB /* AttachmentImage.swift in Sources */,
 				550860A42984370100F5F4EB /* RecordViewController.swift in Sources */,
 				555D9FB229835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift in Sources */,
+				55C812332988551F00921428 /* MoveFolderViewController.swift in Sources */,
 				55191FE72986065D00777D57 /* FolderCell.swift in Sources */,
 				5508609E29842BBF00F5F4EB /* MenuInteraction.swift in Sources */,
 				556A8EC229847F7500A24CF4 /* PaddedTextField.swift in Sources */,

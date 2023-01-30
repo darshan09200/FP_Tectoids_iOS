@@ -70,6 +70,8 @@ class NotesViewController: UIViewController {
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
+		
+		print("called")
 		loadData()
 	}
 	
@@ -100,8 +102,8 @@ class NotesViewController: UIViewController {
 		var filterNotesPredicate: NSPredicate?
 		var filterFolderPredicate: NSPredicate?
 		if let selectedFolder = selectedFolder{
-			filterNotesPredicate = NSPredicate(format: "parentFolder.name == %@", selectedFolder.name!)
-			filterFolderPredicate = NSPredicate(format: "parentFolder.name == %@", selectedFolder.name!)
+			filterNotesPredicate = NSPredicate(format: "parentFolder.folderId == %@", selectedFolder.folderId! as CVarArg)
+			filterFolderPredicate = NSPredicate(format: "parentFolder.folderId == %@", selectedFolder.folderId! as CVarArg)
 		}
 		let sortDescriptor = NSSortDescriptor(key: "updatedAt", ascending: false)
 		if let data = Note.getData(for: filterNotesPredicate, with: [sortDescriptor]) as? [Note]{
@@ -449,7 +451,23 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 		editAction.backgroundColor = .orange
 		
 		let moveToCategory = UIContextualAction(style: .normal, title: "Move to Folder") { (action, view, completion) in
-			// code to move the note to another category
+			let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "MoveFolderViewController") as! MoveFolderViewController
+			if self.segmentControl.selectedSegmentIndex == 0 {
+				controller.selectedNote = self.notes[indexPath.section].children[indexPath.row]
+				if self.isFiltering{
+					controller.selectedNote = self.filteredNotes[indexPath.row]
+				}
+			} else {
+				controller.selectedTask = self.taskList[indexPath.section].children[indexPath.row]
+				if self.isFiltering {
+					controller.selectedTask = self.filteredTaskList[indexPath.row]
+				}
+			}
+			controller.success = {
+				self.loadData()
+			}
+			self.present(UINavigationController(rootViewController: controller), animated: true)
+			completion(true)
 		}
 		moveToCategory.backgroundColor = .systemBlue
 		moveToCategory.image = UIImage(systemName: "folder")
@@ -474,7 +492,9 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 		}
 		delete.image = UIImage(systemName: "trash")
 		actions.append(delete)
-//		actions.append(moveToCategory)
+		if Database.getInstance().folders.count > 1{
+			actions.append(moveToCategory)
+		}
 		if segmentControl.selectedSegmentIndex == 1{
 			actions.append(editAction)
 		}

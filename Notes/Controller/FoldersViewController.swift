@@ -110,6 +110,7 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 				} else{
 					folder = Folder()
 					folder.createdOn = Date.now
+					folder.folderId = UUID()
 				}
 				folder.name = textField.text!
 				Database.getInstance().saveData()
