@@ -16,10 +16,6 @@ class NoteViewController: UIViewController {
 	
 	@IBOutlet weak var textView: SubviewAttachingTextView!
 	
-	@IBOutlet weak var deleteBtn: UIBarButtonItem!
-	
-	@IBOutlet weak var infoBtn: UIBarButtonItem!
-	
 	private lazy var maxImageWidth = textView.frame.width
 	
 	private var isSmall = false
@@ -83,22 +79,13 @@ class NoteViewController: UIViewController {
 	
 	let locationManager = CLLocationManager()
 	
+	lazy var infoBtn = UIBarButtonItem(title: "Info", style: .plain, target: self, action: #selector(onInfoPress(_ :)))
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Initialization code
 		
-		if note == nil{
-			note = Note()
-			note!.noteId = UUID()
-			note!.createdAt = Date.now
-			note!.updatedAt = Date.now
-		}
-		
-		if let parentFolder = parentFolder{
-			note!.parentFolder = parentFolder
-		}
-		
-		loadData()
+		infoBtn.image = UIImage(systemName: "info.circle")
 		
 		textView.textDragInteraction?.isEnabled = false
 		textView.delegate = self
@@ -160,6 +147,22 @@ class NoteViewController: UIViewController {
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
+		
+		print("appeared")
+		if note == nil{
+			print("added")
+			note = Note()
+			note!.noteId = UUID()
+			note!.createdAt = Date.now
+			note!.updatedAt = Date.now
+		}
+		
+		if let parentFolder = parentFolder{
+			note!.parentFolder = parentFolder
+		}
+		
+		loadData()
+		
 		maxImageWidth = UIScreen.main.bounds.width - textView.layoutMargins.left - textView.layoutMargins.right
 	}
 	
@@ -208,7 +211,7 @@ class NoteViewController: UIViewController {
 						}
 					}
 				}
-				
+				self.resetInfoBtn()
 			}
 		}
 		
@@ -244,13 +247,14 @@ class NoteViewController: UIViewController {
 				}
 				
 				note?.extras = Attachments(attachments: extras, isSmall: isSmall)
-				if attributedText.length > 0{
-					print("saved")
-					Database.getInstance().saveData()
-				} else{
-					print("deleted")
-					Note.context.delete(note!)
-				}
+			}
+			if attributedText.length > 0{
+				print("saved")
+				Database.getInstance().saveData()
+			} else{
+				print("deleted")
+				Note.context.delete(note!)
+				self.note = nil
 			}
 		}
 		catch {
@@ -278,6 +282,14 @@ class NoteViewController: UIViewController {
 		// reset back the content inset to zero after keyboard is gone
 		textView.contentInset = contentInsets
 		textView.scrollIndicatorInsets = contentInsets
+	}
+	
+	func resetInfoBtn(){
+		if self.textView.attributedText.string.condenseWhitespace().count > 0 {
+			self.navigationItem.rightBarButtonItem = self.infoBtn
+		} else {
+			self.navigationItem.rightBarButtonItem = nil
+		}
 	}
 	
 	func onResizePress(action: UIAction){
@@ -530,19 +542,12 @@ class NoteViewController: UIViewController {
 		textView.becomeFirstResponder()
 		textView.attributedText = attributedText
 	}
-	
-	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
-		print("tapped")
-	}
-	
-	
-	@IBAction func onDeletePress(_ sender: UIBarButtonItem) {
-		if let note = note{
-			Note.context.delete(note)
-		}
-	}
-	
-	@IBAction func onInfoPress(_ sender: UIBarButtonItem) {
+//	
+//	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
+//		print("tapped")
+//	}
+//	
+	@objc func onInfoPress(_ sender: UIBarButtonItem) {
 		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "NotesInfoVC") as! NotesInfoViewController
 		controller.currentNote = note
 		self.present(UINavigationController(rootViewController: controller), animated: true)

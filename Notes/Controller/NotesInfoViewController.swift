@@ -24,7 +24,7 @@ class NotesInfoViewController: UIViewController {
 		mapView.layer.cornerRadius = 8
 
 		if let note = currentNote{
-			titleLabel.text = NSAttributedString.loadFromHtml(content: note.content ?? "")?.getLine().string
+			titleLabel.text = NSAttributedString.loadFromHtml(content: note.content ?? "")?.getLine()?.string ?? "New Note"
 			
 			subTitleLabel.text = note.updatedAt?.fullDate()
 			
@@ -44,6 +44,9 @@ class NotesInfoViewController: UIViewController {
     }
     
 	@IBAction func onDeletePress() {
+		if let note = currentNote{
+			Note.context.delete(note)
+		}
 	}
 	
 	@IBAction func onCancelPress(_ sender: Any) {

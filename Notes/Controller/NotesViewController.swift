@@ -361,32 +361,35 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 			if let content = note.content{
 				let searchString = NSAttributedString.loadFromHtml(content: content)
 				if let searchString = searchString{
+					let subtitle = NSMutableAttributedString(string: note.updatedAt?.format() ?? "")
+					let attributes: [NSAttributedString.Key: Any] = [
+						.foregroundColor: UIColor.secondaryLabel,
+						.font: UIFont.preferredFont(forTextStyle: .caption1)
+					]
 					let currentLine = searchString.getLineRange()
 					if currentLine.location > -1 && currentLine.length > 1{
 						let title = searchString.attributedSubstring(from: currentLine).string
 						cell.noteTitle?.text = title
-						let subtitle = NSMutableAttributedString(string: note.updatedAt?.format() ?? "")
+						
 						let remainingText: NSMutableAttributedString
 						let nextStart = currentLine.location + currentLine.length
 						if searchString.length - nextStart > -1 {
 							let remainingString = searchString.attributedSubstring(
 								from: NSRange(location: nextStart, length: searchString.length - nextStart)).string.condenseWhitespace()
 							print(remainingString)
-							let attributes: [NSAttributedString.Key: Any] = [
-								.foregroundColor: UIColor.secondaryLabel,
-								.font: UIFont.preferredFont(forTextStyle: .caption1)
-							]
+							
 							remainingText = NSMutableAttributedString(string: "  \(remainingString)", attributes: attributes)
 						} else {
-							let attributes: [NSAttributedString.Key: Any] = [
-								.foregroundColor: UIColor.secondaryLabel,
-								.font: UIFont.preferredFont(forTextStyle: .caption1)
-							]
 							remainingText = NSMutableAttributedString(string: "  No additional text", attributes: attributes)
 						}
 						subtitle.append(remainingText)
-						cell.noteDate.attributedText = subtitle
+					} else {
+						cell.noteTitle.text = "New Note"
+						if let count = note.extras?.attachments.count, count > 0{
+							subtitle.append(NSMutableAttributedString(string: "  \(count) Attachments", attributes: attributes))
+						}
 					}
+					cell.noteDate.attributedText = subtitle
 				}
 			}
 			if let extras = note.extras, let firstImage = extras.attachments.first(where: {$0.type == .image}), let image = AttachmentImage.load(fileURL: firstImage.path){
@@ -449,7 +452,7 @@ extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 		moveToCategory.image = UIImage(systemName: "folder")
 		
 		let delete = UIContextualAction(style: .destructive, title: "Delete") { (_, _, completion) in
-			if self.segmentControl.selectedSegmentIndex == 0{
+			if self.segmentControl.selectedSegmentIndex == 0 {
 				var note = self.notes[indexPath.section].children[indexPath.row]
 				if self.isFiltering{
 					note = self.filteredNotes[indexPath.row]

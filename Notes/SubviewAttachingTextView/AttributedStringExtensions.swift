@@ -116,8 +116,13 @@ extension NSAttributedString {
 		return nil
 	}
 	
-	func getLine(at cursorPosition: Int = 0) -> NSAttributedString{
-		return attributedSubstring(from: getLineRange())
+	func getLine(at cursorPosition: Int = 0) -> NSAttributedString?{
+		let currentLine = getLineRange()
+		if currentLine.location > -1 && currentLine.length > -1 &&
+			currentLine.location + currentLine.length < self.length{
+			return attributedSubstring(from: currentLine)
+		}
+		return nil
 	}
 	
 	func getLineRange (at cursorPosition: Int = 0) -> NSRange{

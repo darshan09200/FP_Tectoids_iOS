@@ -321,24 +321,8 @@
                             <constraint firstItem="geT-W2-eoQ" firstAttribute="leading" secondItem="yny-Zv-nhR" secondAttribute="leading" id="wEn-iI-blL"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Note" largeTitleDisplayMode="never" id="9dK-FW-bGr">
-                        <rightBarButtonItems>
-                            <barButtonItem systemItem="trash" id="YLD-7d-A5n">
-                                <color key="tintColor" systemColor="systemRedColor"/>
-                                <connections>
-                                    <action selector="onDeletePress:" destination="reE-ni-yxP" id="EHz-Dg-Vop"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem title="Info" image="info.circle" catalog="system" id="rxj-bD-cDi">
-                                <connections>
-                                    <action selector="onInfoPress:" destination="reE-ni-yxP" id="nce-QT-997"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Note" largeTitleDisplayMode="never" id="9dK-FW-bGr"/>
                     <connections>
-                        <outlet property="deleteBtn" destination="YLD-7d-A5n" id="8ff-RJ-QUr"/>
-                        <outlet property="infoBtn" destination="rxj-bD-cDi" id="JvQ-kR-Pvb"/>
                         <outlet property="textView" destination="geT-W2-eoQ" id="hz8-mw-hCs"/>
                     </connections>
                 </viewController>
@@ -753,7 +737,6 @@
         <image name="checkmark.circle.fill" catalog="system" width="128" height="123"/>
         <image name="chevron.right" catalog="system" width="97" height="128"/>
         <image name="folder" catalog="system" width="128" height="96"/>
-        <image name="info.circle" catalog="system" width="128" height="123"/>
         <image name="mic" catalog="system" width="110" height="128"/>
         <image name="plus" catalog="system" width="128" height="113"/>
         <image name="square.and.pencil" catalog="system" width="128" height="113"/>
