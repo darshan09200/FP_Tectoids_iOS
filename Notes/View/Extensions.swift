@@ -44,4 +44,45 @@ public extension TimeInterval{
 		let formattedString = formatter.string(from: TimeInterval(self))!
 		return formattedString
 	}
+	
+}
+
+extension Date{
+	func fullDate() -> String {
+		let dateFormatterGet = DateFormatter()
+		dateFormatterGet.dateFormat = "MMM dd, yyyy hh:mm a"
+	
+		return dateFormatterGet.string(from: self)
+	}
+	
+	func format() -> String{
+		let dateFormatterGet = DateFormatter()
+		let currentDate = Date.now
+		if Calendar.current.isDate(self, inSameDayAs: currentDate){
+			dateFormatterGet.dateFormat = "hh:mm a"
+		} else if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: currentDate),
+					Calendar.current.isDate(self, inSameDayAs: yesterday) {
+			return "Yesterday"
+		} else if let nexWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentDate), self < nexWeek{
+			dateFormatterGet.dateFormat = "EEEE"
+		} else {
+			dateFormatterGet.dateFormat = "MMM dd, yyyy"
+		}
+		
+		return dateFormatterGet.string(from: self)
+	}
+}
+
+extension UITextField{
+	func addObserver(for action: UIAlertAction){
+		action.isEnabled = self.text?.count ?? 0 > 0
+		NotificationCenter.default.addObserver(forName: UITextField.textDidChangeNotification, object: self, queue: OperationQueue.main)
+		{_ in
+			
+			let textCount = self.text?.trimmingCharacters(in: .whitespacesAndNewlines).count ?? 0
+			let textIsNotEmpty = textCount > 0
+			
+			action.isEnabled = textIsNotEmpty
+		}
+	}
 }

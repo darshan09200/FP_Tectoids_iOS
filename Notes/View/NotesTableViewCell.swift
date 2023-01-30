@@ -12,8 +12,7 @@ class NotesTableViewCell: UITableViewCell {
     
     @IBOutlet weak var noteTitle: UILabel!
     @IBOutlet weak var noteDate: UILabel!
-    
-    @IBOutlet weak var noteImage: UIImageView!
+	@IBOutlet weak var noteImage: UIImageView!
     
     
     override func awakeFromNib() {

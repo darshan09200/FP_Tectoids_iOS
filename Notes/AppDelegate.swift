@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import UserNotifications
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		// Override point for customization after application launch.
 		
 		AttachmentTransformer.register()
+		
+		NotificationConfig.instance.setupNotification()
 		return true
 	}
 
@@ -68,13 +71,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	func saveContext () {
 	    let context = persistentContainer.viewContext
 	    if context.hasChanges {
-	        do {
+			do {
 	            try context.save()
 	        } catch {
 	            // Replace this implementation with code to handle the error appropriately.
 	            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
 	            let nserror = error as NSError
-	            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+	            print("Unresolved error \(nserror), \(nserror.userInfo)")
 	        }
 	    }
 	}

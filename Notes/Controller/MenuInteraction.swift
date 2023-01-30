@@ -7,6 +7,7 @@
 
 import UIKit
 
-class ImageInteraction: UIContextMenuInteraction {
+class MenuInteraction: UIContextMenuInteraction {
 	var path: String?
+	var type: FileType?
 }

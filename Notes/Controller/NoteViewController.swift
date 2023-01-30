@@ -79,28 +79,19 @@ class NoteViewController: UIViewController {
 	
 	let locationManager = CLLocationManager()
 	
+	lazy var infoBtn = UIBarButtonItem(title: "Info", style: .plain, target: self, action: #selector(onInfoPress(_ :)))
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Initialization code
 		
-		if note == nil{
-			note = Note()
-			note!.noteId = UUID()
-			note!.createdAt = Date.now
-			note!.updatedAt = Date.now
-		}
-		
-		if let parentFolder = parentFolder{
-			note!.parentFolder = parentFolder
-		}
-		
-		loadData()
+		infoBtn.image = UIImage(systemName: "info.circle")
 		
 		textView.textDragInteraction?.isEnabled = false
 		textView.delegate = self
 		
 		locationManager.requestWhenInUseAuthorization()
-	
+		
 		locationManager.delegate = self
 		locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
 		locationManager.startUpdatingLocation()
@@ -123,7 +114,7 @@ class NoteViewController: UIViewController {
 		
 		alignmentButton.image = UIImage(systemName: "text.alignleft")
 		alignmentButton.tintColor = .label
-
+		
 		addImageButton.image = UIImage(systemName: "photo")
 		addImageButton.tintColor = .label
 		
@@ -156,7 +147,23 @@ class NoteViewController: UIViewController {
 	
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
+		
+		if note == nil{
+			note = Note()
+			note!.noteId = UUID()
+			note!.createdAt = Date.now
+			note!.updatedAt = Date.now
+		}
+		
+		if let parentFolder = parentFolder{
+			note!.parentFolder = parentFolder
+		}
+		
+		loadData()
+		
 		maxImageWidth = UIScreen.main.bounds.width - textView.layoutMargins.left - textView.layoutMargins.right
+		
+		textView.becomeFirstResponder()
 	}
 	
 	override func viewWillDisappear(_ animated: Bool) {
@@ -177,6 +184,11 @@ class NoteViewController: UIViewController {
 				let attributedText = try? NSMutableAttributedString(data: htmlData ?? Data(),
 																	options: options,
 																	documentAttributes: nil)
+				attributedText?.enumerateAttribute(.foregroundColor, in: NSRange(location: 0, length: attributedText?.length ?? 0)){
+					value, range, _ in
+					attributedText?.addAttributes([.foregroundColor: UIColor.label], range: range)
+				}
+				
 				self.textView.attributedText = attributedText?.attributedStringByTrimmingCharacterSet(charSet: .newlines)
 				
 				if let extras = self.note?.extras{
@@ -199,14 +211,14 @@ class NoteViewController: UIViewController {
 						}
 					}
 				}
-				
+				self.resetInfoBtn()
 			}
 		}
 		
 	}
 	
 	func saveData(){
-		let attributedText = textView.attributedText!
+		let attributedText = textView.attributedText!.attributedStringByTrimmingCharacterSet(charSet: .newlines)
 		let documentAttributes = [NSAttributedString.DocumentAttributeKey.documentType: NSAttributedString.DocumentType.html]
 		do {
 			let htmlData = try attributedText.data(from: NSMakeRange(0, attributedText.length), documentAttributes:documentAttributes)
@@ -235,13 +247,14 @@ class NoteViewController: UIViewController {
 				}
 				
 				note?.extras = Attachments(attachments: extras, isSmall: isSmall)
-				if attributedText.length > 0{
-					print("saved")
-					Database.getInstance().saveData()
-				} else{
-					print("deleted")
-					Note.context.delete(note!)
-				}
+			}
+			if attributedText.length > 0{
+				print("saved")
+				Database.getInstance().saveData()
+			} else{
+				print("deleted")
+				Note.context.delete(note!)
+				self.note = nil
 			}
 		}
 		catch {
@@ -249,6 +262,7 @@ class NoteViewController: UIViewController {
 		}
 		
 	}
+	
 	@objc func keyboardWillShow(notification: NSNotification) {
 		guard let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
 		else {
@@ -268,6 +282,14 @@ class NoteViewController: UIViewController {
 		// reset back the content inset to zero after keyboard is gone
 		textView.contentInset = contentInsets
 		textView.scrollIndicatorInsets = contentInsets
+	}
+	
+	func resetInfoBtn(){
+		if self.textView.attributedText.string.condenseWhitespace().count > 0 {
+			self.navigationItem.rightBarButtonItem = self.infoBtn
+		} else {
+			self.navigationItem.rightBarButtonItem = nil
+		}
 	}
 	
 	func onResizePress(action: UIAction){
@@ -450,11 +472,12 @@ class NoteViewController: UIViewController {
 		imageView.isUserInteractionEnabled = true
 		
 		
-//		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
-//		imageView.addGestureRecognizer(tapGestureRecognizer)
+		//		let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
+		//		imageView.addGestureRecognizer(tapGestureRecognizer)
 		
-		let interaction = ImageInteraction(delegate: self)
+		let interaction = MenuInteraction(delegate: self)
 		interaction.path = image.path
+		interaction.type = .image
 		imageView.addInteraction(interaction)
 		let imageAttachment = SubviewTextAttachment(view: imageView, size: imageView.frame.size)
 		
@@ -467,27 +490,27 @@ class NoteViewController: UIViewController {
 		let previousTextRange = NSRange(location: textView.selectedRange.location - 1, length: 1)
 		if previousTextRange.location > -1{
 			let previousText = attributedText.attributedSubstring(from: previousTextRange)
-//			if previousText.string != "\n" && !isSmall {
-//				attributedText.insert(newLine, at: previousTextRange.location + 1)
-//				newLinePosition += 1
-//			} else if isSmall{
-				let previousImageRange = NSRange(location: previousTextRange.location - (previousText.string == "\n" ? 1 : 0), length: 1)
-				if previousImageRange.location > -1 {
-					let previousImage = attributedText.attributedSubstring(from: previousImageRange)
-					if isResizableImage(attachment: previousImage){
-						if previousText.string == "\n"{
-							attributedText.deleteCharacters(in: previousTextRange)
-							newLinePosition -= 1
-						}
-					} else if previousText.string != "\n" {
-						attributedText.insert(newLine, at: previousTextRange.location + 1)
-						newLinePosition += 1
+			//			if previousText.string != "\n" && !isSmall {
+			//				attributedText.insert(newLine, at: previousTextRange.location + 1)
+			//				newLinePosition += 1
+			//			} else if isSmall{
+			let previousImageRange = NSRange(location: previousTextRange.location - (previousText.string == "\n" ? 1 : 0), length: 1)
+			if previousImageRange.location > -1 {
+				let previousImage = attributedText.attributedSubstring(from: previousImageRange)
+				if isResizableImage(attachment: previousImage){
+					if previousText.string == "\n"{
+						attributedText.deleteCharacters(in: previousTextRange)
+						newLinePosition -= 1
 					}
-				}else if previousText.string != "\n"{
+				} else if previousText.string != "\n" {
 					attributedText.insert(newLine, at: previousTextRange.location + 1)
 					newLinePosition += 1
 				}
-//			}
+			}else if previousText.string != "\n"{
+				attributedText.insert(newLine, at: previousTextRange.location + 1)
+				newLinePosition += 1
+			}
+			//			}
 		}
 		
 		let postTextRange = NSRange(location: textView.selectedRange.location + textView.selectedRange.length + 1, length: 1)
@@ -505,7 +528,13 @@ class NoteViewController: UIViewController {
 	
 	func addAudio(path: String){
 		var attributedText = NSMutableAttributedString(attributedString: textView.attributedText)
-		let audioView = AudioPlayer(frame: CGRect(x: 8, y: 8, width: maxImageWidth - 16, height: 64), path: path)
+		let audioView = AudioPlayer(frame: CGRect(x: 8, y: 8, width: maxImageWidth, height: 64), path: path)
+		
+		let interaction = MenuInteraction(delegate: self)
+		interaction.path = path
+		interaction.type = .audio
+		audioView.addInteraction(interaction)
+		
 		let audioAttachment = SubviewTextAttachment(view: audioView, size: audioView.frame.size)
 		attributedText = NSMutableAttributedString(attributedString: attributedText
 			.insertingAttachment(audioAttachment, at: textView.selectedRange.location))
@@ -513,11 +542,16 @@ class NoteViewController: UIViewController {
 		textView.becomeFirstResponder()
 		textView.attributedText = attributedText
 	}
-	
-	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
-		print("tapped")
+//	
+//	@objc func onImageTap(_ sender: ImageTapGestureRecognizer){
+//		print("tapped")
+//	}
+//	
+	@objc func onInfoPress(_ sender: UIBarButtonItem) {
+		let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "NotesInfoVC") as! NotesInfoViewController
+		controller.currentNote = note
+		self.present(UINavigationController(rootViewController: controller), animated: true)
 	}
-	
 }
 
 
@@ -535,7 +569,7 @@ extension NoteViewController: UITextViewDelegate{
 					var isPreviousImage = false
 					let previousRange = NSRange(location: range.location -
 												1
-//												(isSmall ? 1 : 2)
+												//												(isSmall ? 1 : 2)
 												, length: 1)
 					if previousRange.location > -1{
 						isPreviousImage = isResizableImage(attachment: textView.attributedText.attributedSubstring(from: previousRange))
@@ -634,10 +668,14 @@ extension NoteViewController: UITextViewDelegate{
 		if cursorPosition < 0 {
 			cursorPosition = 0
 		}
-		
+		alignmentButton.isEnabled = true
 		var attributes = textView.typingAttributes
 		if textView.attributedText.length > 0{
 			attributes = textView.attributedText.attributes(at: cursorPosition, effectiveRange: nil)
+			let currentLine = getCurrentLine()
+			if textView.attributedText.containsAttachments(in: currentLine){
+				alignmentButton.isEnabled = false
+			}
 		}
 		
 		if let font = attributes[.font] as? UIFont{
@@ -690,93 +728,66 @@ extension NoteViewController: UIContextMenuInteractionDelegate {
 		return flag
 	}
 	
+	func removeAttachment(for path: String){
+		let attributedText: NSMutableAttributedString = self.textView.attributedText.mutableCopy() as! NSMutableAttributedString
+		attributedText.enumerateAttribute(
+			.attachment,
+			in: NSRange(location: 0, length: attributedText.length))
+		{ value, range, stopLoop in
+			if let attachment = value as? SubviewTextAttachment,
+			   let provider = attachment.viewProvider as? DirectTextAttachedViewProvider{
+				if let imageView = provider.view as? AttachmentImageView,
+					let image = imageView.image as? AttachmentImage,
+					image.path == path{
+					attributedText.replaceCharacters(in: range, with: "")
+					stopLoop.initialize(to: true)
+				} else if let audioView = provider.view as? AudioPlayer,
+							audioView.path == path{
+					attributedText.replaceCharacters(in: range, with: "")
+					stopLoop.initialize(to: true)
+				}
+			}
+			
+		}
+		self.textView.attributedText = attributedText.attributedStringByTrimmingCharacterSet(charSet: .newlines)
+	}
+	
 	func resizeImages(){
 		isSmall = !isSmall
 		saveData()
 		loadData()
-		
-		/**
-		 Strictly for reference
-		 
-		 var attributedText: NSMutableAttributedString = self.textView.attributedText.mutableCopy() as! NSMutableAttributedString
-		 attributedText.enumerateAttribute(
-		 NSAttributedString.Key.attachment,
-		 in: NSRange(location: 0, length: attributedText.length))
-		 { value, range, _ in
-		 if let attachment = value as? SubviewTextAttachment,
-		 let provider = attachment.viewProvider as? DirectTextAttachedViewProvider,
-		 let oldImageView = provider.view as? AttachmentImageView {
-			 if(oldImageView.shouldResize){
-			 let possiblePreviousImageIndex = range.location - (isSmall ? 2 : 1)
-			 var isPreviousImage = false
-			 if possiblePreviousImageIndex > -1{
-				isPreviousImage = isResizableImage(attachment: attributedText.attributedSubstring(from: NSRange(location:
-							possiblePreviousImageIndex, length: 1)))
-			 }
-			 var replaceRange = NSRange(location: range.location, length: range.length)
-			 var insertRange = NSRange(location: range.location, length: range.length)
-			 if isPreviousImage && isSmall {
-				replaceRange = NSRange(location: possiblePreviousImageIndex + 1, length: range.length + (isSmall ? 1 : 0))
-				insertRange = NSRange(location: insertRange.location - (isSmall ? 1 : 0), length: insertRange.length)
-			 } else {
-				 let previousTextRange = NSRange(location: range.location - 1, length: 1)
-				 if previousTextRange.location > -1{
-					 let isPreviousNewLine = attributedText.attributedSubstring(from: previousTextRange).string == "\n"
-					 if !isPreviousNewLine{
-						 attributedText.insert(newLine, at: range.location)
-						 replaceRange = NSRange(location: range.location + 1, length: range.length)
-						 insertRange = NSRange(location: insertRange.location + 1, length: insertRange.length)
-					 }
-				 }
-			 }
-			 replaceRange = NSRange(location: max(replaceRange.location, attributedText.length - 1), length: replaceRange.length)
-			 attributedText.replaceCharacters(in: replaceRange, with: "")
-			 
-			 let image = (oldImageView.image as! AttachmentImage).clone()!
-			 let imageView = AttachmentImageView(image: image, shouldResize: true)
-			 
-			 let tapGestureRecognizer = ImageTapGestureRecognizer(target: self, action: #selector(onImageTap(_:)))
-			 imageView.addGestureRecognizer(tapGestureRecognizer)
-			 
-			 let interaction = UIContextMenuInteraction(delegate: self)
-			 imageView.addInteraction(interaction)
-			 
-			 imageView.isUserInteractionEnabled = true
-			 
-			 let (newWidth, newHeight) = getNewWidthHeight(oldWidth: image.size.width, oldHeight: image.size.height, scaledToWidth:
-									self.maxImageWidth * (isSmall ? 0.5 : 1))
-			 imageView.frame.size = CGSize(width: newWidth, height: newHeight)
-			 
-			 let updatedAttahment = SubviewTextAttachment(view: imageView, size: imageView.frame.size)
-			 
-			 attributedText.insertAttachment(updatedAttahment, at: insertRange.location)
-			 }
-		 }
-		 
-		 }
-		 self.textView.attributedText = (attributedText.copy() as! NSAttributedString)
-		 */
 	}
 	
 	func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
 		return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
 			var actions = [UIAction]()
 			let shareAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { action in
-				if let interaction = interaction as? ImageInteraction, let path = interaction.path{					
-					self.imagePickerController.shareImage(path: path, sourceView: interaction.view)
+				if let interaction = interaction as? MenuInteraction, let path = interaction.path{
+					self.imagePickerController.shareFile(path: path, sourceView: interaction.view)
 				}
-			}
-			
-			if let _ = interaction as? ImageInteraction{
-				actions.append(shareAction)
 			}
 			
 			let resizeAction = UIAction(title: "Resize", image: UIImage(systemName: self.isSmall ? "arrow.up.left.and.arrow.down.right" : "arrow.down.right.and.arrow.up.left")) { action in
 				self.resizeImages()
 			}
 			
-			actions.append(resizeAction)
-			return UIMenu(title: "", children: actions)
+			if let interaction = interaction as? MenuInteraction{
+				actions.append(shareAction)
+				if interaction.type == .image{
+					actions.append(resizeAction)
+				}
+				if let path = interaction.path{
+					let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+						self.removeAttachment(for: path)
+					}
+					actions.append(deleteAction)
+				}
+			}
+			if actions.count > 0{
+				return UIMenu(title: "", children: actions)
+			} else {
+				return nil
+			}
 		}
 	}
 }
@@ -802,8 +813,8 @@ extension NoteViewController: ImagePickerDelegate {
 extension NoteViewController: CLLocationManagerDelegate{
 	func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 		guard let location: CLLocationCoordinate2D = manager.location?.coordinate else { return }
-		note?.latitude = Double(location.longitude)
-		note?.longitude = Double(location.latitude)
+		note?.latitude = location.latitude
+		note?.longitude = location.longitude
 	}
 }
 

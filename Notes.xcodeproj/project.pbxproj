@@ -16,16 +16,21 @@
 		5508609829839B3D00F5F4EB /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5508609729839B3D00F5F4EB /* ImagePicker.swift */; };
 		5508609A29839B6A00F5F4EB /* FileHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5508609929839B6A00F5F4EB /* FileHandling.swift */; };
 		5508609C29839D9700F5F4EB /* AttachmentImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5508609B29839D9700F5F4EB /* AttachmentImage.swift */; };
-		5508609E29842BBF00F5F4EB /* ImageInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5508609D29842BBF00F5F4EB /* ImageInteraction.swift */; };
+		5508609E29842BBF00F5F4EB /* MenuInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5508609D29842BBF00F5F4EB /* MenuInteraction.swift */; };
 		550860A42984370100F5F4EB /* RecordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550860A32984370100F5F4EB /* RecordViewController.swift */; };
 		550860A62984404100F5F4EB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550860A52984404100F5F4EB /* Extensions.swift */; };
 		550860A8298440D400F5F4EB /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550860A7298440D400F5F4EB /* AudioPlayer.swift */; };
 		550860AA2984521900F5F4EB /* AudioPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550860A92984521900F5F4EB /* AudioPicker.swift */; };
+		55191FE72986065D00777D57 /* FolderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55191FE62986065D00777D57 /* FolderCell.swift */; };
+		5542060B29881D84005DBA8C /* NotificationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5542060A29881D84005DBA8C /* NotificationConfig.swift */; };
 		555D9FAE29835E7800E3DDC7 /* SubviewAttachingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FAD29835E7800E3DDC7 /* SubviewAttachingTextView.swift */; };
 		555D9FB229835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FAF29835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift */; };
 		555D9FB329835E8200E3DDC7 /* TextAttachedViewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB029835E8200E3DDC7 /* TextAttachedViewProvider.swift */; };
 		555D9FB429835E8200E3DDC7 /* SubviewTextAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB129835E8200E3DDC7 /* SubviewTextAttachment.swift */; };
 		555D9FB629835EA600E3DDC7 /* AttributedStringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 555D9FB529835EA600E3DDC7 /* AttributedStringExtensions.swift */; };
+		556A8EC229847F7500A24CF4 /* PaddedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC129847F7500A24CF4 /* PaddedTextField.swift */; };
+		556A8EC42984834C00A24CF4 /* TaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC32984834C00A24CF4 /* TaskViewController.swift */; };
+		556A8EC6298483A300A24CF4 /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556A8EC5298483A300A24CF4 /* TaskCell.swift */; };
 		5582CD8029835D2C00B29347 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5582CD7F29835D2C00B29347 /* NoteViewController.swift */; };
 		559686732977648300A59E79 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686722977648300A59E79 /* AppDelegate.swift */; };
 		559686752977648300A59E79 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559686742977648300A59E79 /* SceneDelegate.swift */; };
@@ -49,16 +54,21 @@
 		5508609729839B3D00F5F4EB /* ImagePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		5508609929839B6A00F5F4EB /* FileHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandling.swift; sourceTree = "<group>"; };
 		5508609B29839D9700F5F4EB /* AttachmentImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentImage.swift; sourceTree = "<group>"; };
-		5508609D29842BBF00F5F4EB /* ImageInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageInteraction.swift; sourceTree = "<group>"; };
+		5508609D29842BBF00F5F4EB /* MenuInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuInteraction.swift; sourceTree = "<group>"; };
 		550860A32984370100F5F4EB /* RecordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordViewController.swift; sourceTree = "<group>"; };
 		550860A52984404100F5F4EB /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		550860A7298440D400F5F4EB /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		550860A92984521900F5F4EB /* AudioPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPicker.swift; sourceTree = "<group>"; };
+		55191FE62986065D00777D57 /* FolderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderCell.swift; sourceTree = "<group>"; };
+		5542060A29881D84005DBA8C /* NotificationConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationConfig.swift; sourceTree = "<group>"; };
 		555D9FAD29835E7800E3DDC7 /* SubviewAttachingTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubviewAttachingTextView.swift; sourceTree = "<group>"; };
 		555D9FAF29835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubviewAttachingTextViewBehavior.swift; sourceTree = "<group>"; };
 		555D9FB029835E8200E3DDC7 /* TextAttachedViewProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextAttachedViewProvider.swift; sourceTree = "<group>"; };
 		555D9FB129835E8200E3DDC7 /* SubviewTextAttachment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubviewTextAttachment.swift; sourceTree = "<group>"; };
 		555D9FB529835EA600E3DDC7 /* AttributedStringExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributedStringExtensions.swift; sourceTree = "<group>"; };
+		556A8EC129847F7500A24CF4 /* PaddedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextField.swift; sourceTree = "<group>"; };
+		556A8EC32984834C00A24CF4 /* TaskViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskViewController.swift; sourceTree = "<group>"; };
+		556A8EC5298483A300A24CF4 /* TaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
 		5582CD7F29835D2C00B29347 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
 		5596866F2977648300A59E79 /* Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Notes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		559686722977648300A59E79 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -100,12 +110,15 @@
 		5582CD7C29835CD900B29347 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				556A8EC5298483A300A24CF4 /* TaskCell.swift */,
 				3337218B297F5C200017DC64 /* NotesTableViewCell.swift */,
 				559686782977648300A59E79 /* Main.storyboard */,
 				559686802977648400A59E79 /* LaunchScreen.storyboard */,
 				5508609B29839D9700F5F4EB /* AttachmentImage.swift */,
 				550860A52984404100F5F4EB /* Extensions.swift */,
 				550860A7298440D400F5F4EB /* AudioPlayer.swift */,
+				556A8EC129847F7500A24CF4 /* PaddedTextField.swift */,
+				55191FE62986065D00777D57 /* FolderCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -113,15 +126,17 @@
 		5582CD7D29835CF100B29347 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				556A8EC32984834C00A24CF4 /* TaskViewController.swift */,
 				5508609729839B3D00F5F4EB /* ImagePicker.swift */,
 				550860A92984521900F5F4EB /* AudioPicker.swift */,
 				33372189297F551E0017DC64 /* NotesViewController.swift */,
 				8F750AF4297F42780051E95C /* NotesInfoViewController.swift */,
 				559686762977648300A59E79 /* FoldersViewController.swift */,
 				5582CD7F29835D2C00B29347 /* NoteViewController.swift */,
-				5508609D29842BBF00F5F4EB /* ImageInteraction.swift */,
+				5508609D29842BBF00F5F4EB /* MenuInteraction.swift */,
 				550860A32984370100F5F4EB /* RecordViewController.swift */,
 				3304F25B298467FE0068B18F /* AddTaskViewController.swift */,
+				5542060A29881D84005DBA8C /* NotificationConfig.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -252,15 +267,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				550860A62984404100F5F4EB /* Extensions.swift in Sources */,
+				556A8EC42984834C00A24CF4 /* TaskViewController.swift in Sources */,
 				559686772977648300A59E79 /* FoldersViewController.swift in Sources */,
 				559686732977648300A59E79 /* AppDelegate.swift in Sources */,
 				3337218A297F551E0017DC64 /* NotesViewController.swift in Sources */,
+				556A8EC6298483A300A24CF4 /* TaskCell.swift in Sources */,
 				550860AA2984521900F5F4EB /* AudioPicker.swift in Sources */,
 				5508609829839B3D00F5F4EB /* ImagePicker.swift in Sources */,
 				5508609C29839D9700F5F4EB /* AttachmentImage.swift in Sources */,
 				550860A42984370100F5F4EB /* RecordViewController.swift in Sources */,
 				555D9FB229835E8200E3DDC7 /* SubviewAttachingTextViewBehavior.swift in Sources */,
-				5508609E29842BBF00F5F4EB /* ImageInteraction.swift in Sources */,
+				55191FE72986065D00777D57 /* FolderCell.swift in Sources */,
+				5508609E29842BBF00F5F4EB /* MenuInteraction.swift in Sources */,
+				556A8EC229847F7500A24CF4 /* PaddedTextField.swift in Sources */,
 				55086092298391FD00F5F4EB /* Attachment.swift in Sources */,
 				555D9FB629835EA600E3DDC7 /* AttributedStringExtensions.swift in Sources */,
 				550860A8298440D400F5F4EB /* AudioPlayer.swift in Sources */,
@@ -276,6 +295,7 @@
 				5596867D2977648300A59E79 /* Notes.xcdatamodeld in Sources */,
 				555D9FAE29835E7800E3DDC7 /* SubviewAttachingTextView.swift in Sources */,
 				550860962983975600F5F4EB /* AttachmentTransformer.swift in Sources */,
+				5542060B29881D84005DBA8C /* NotificationConfig.swift in Sources */,
 				3304F25C298467FE0068B18F /* AddTaskViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
