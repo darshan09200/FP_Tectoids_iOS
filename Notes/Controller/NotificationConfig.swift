@@ -51,8 +51,11 @@ class NotificationConfig: NSObject{
 		
 		notificationContent.badge = NSNumber(value: UIApplication.shared.applicationIconBadgeNumber + 1)
 		
+		let notificationDate = data.date < Date.now ?
+		Calendar.current.date(byAdding: .minute, value: 1, to: Date.now)! :
+		data.date
 		// Add Trigger
-		let notificationTrigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: data.date), repeats: false)
+		let notificationTrigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate), repeats: false)
 		
 		// Create Notification Request
 		let notificationRequest = UNNotificationRequest(identifier: data.identifier, content: notificationContent, trigger: notificationTrigger)
@@ -80,15 +83,32 @@ extension NotificationConfig: UNUserNotificationCenterDelegate{
 				print("mark complete")
 				markTaskAsComplete(taskId: id)
 			default:
-				print("Other Action")
+				let task = getTask(for: id)
+				if let task = task{
+					let mainStoryBoard : UIStoryboard  = UIStoryboard(name: "Main", bundle: nil)
+					let navigationController = mainStoryBoard.instantiateViewController(withIdentifier: "NavigationController") as! UINavigationController
+					
+					let controller = (mainStoryBoard.instantiateViewController(withIdentifier: "TaskViewController") as! TaskViewController)
+					controller.currentTaskList = task.list!
+					navigationController.pushViewController(controller, animated: true)
+					
+					UIApplication.shared.windows.first?.rootViewController = navigationController
+					UIApplication.shared.windows.first?.makeKeyAndVisible()
+				}
 		}
 		completionHandler()
 		print("received")
 	}
 	
-	func markTaskAsComplete(taskId: String){
+	func getTask(for taskId: String) -> Task?{
 		let tasks = Database.getInstance().tasks
 		let currentTask = tasks.first(where: {$0.taskId!.uuidString == taskId})
+		return currentTask
+	}
+	
+	func markTaskAsComplete(taskId: String){
+		let tasks = Database.getInstance().tasks
+		let currentTask = getTask(for: taskId)
 		if let currentTask = currentTask{
 			var childTask = [Task]()
 			if currentTask.parentTask == nil{
@@ -101,11 +121,43 @@ extension NotificationConfig: UNUserNotificationCenterDelegate{
 				Database.getInstance().saveData()
 				UIApplication.shared.applicationIconBadgeNumber -= 1
 				NotificationCenter.default.post(name: NSNotification.Name(rawValue: NotificationIdentifier.Category.task), object: nil)
-				UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["\(currentTask.taskId!.uuidString)_incomplete"])
-				UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["\(currentTask.taskId!.uuidString)_incomplete"])
-			}
-			
+			} else {
+				couldntCompleteNotification(task: currentTask)
+			}			
 		}
+	}
+	
+	func setupNotification(task: Task){
+		let fiveMins = Calendar.current.date(byAdding: .minute, value: -AddTaskViewController.MIN_DIFFERENCE, to: task.dueDate!)!
+		
+		let content = UNMutableNotificationContent()
+		content.title = task.title!
+		content.subtitle = "Your task is due"
+		content.categoryIdentifier = NotificationIdentifier.Category.task
+		let data = NotificationTemplate(identifier: task.taskId!.uuidString, notificationContent: content, date: fiveMins)
+		
+		createNotification(data: data)
+	}
+	
+	func couldntCompleteNotification(task: Task){
+		print("couldnt complete")
+
+		let notCompleteContent = UNMutableNotificationContent()
+		notCompleteContent.title = task.title!
+		notCompleteContent.subtitle = "Your task couldn't be completed as there are some pending child tasks"
+		notCompleteContent.categoryIdentifier = NotificationIdentifier.Category.taskIncomplete
+		let notCompleteData = NotificationTemplate(identifier: "\(task.taskId!.uuidString)_incomplete", notificationContent: notCompleteContent, date: Calendar.current.date(byAdding: .minute, value: 1, to: task.dueDate!)!)
+		createNotification(data: notCompleteData)
+	}
+	
+	func removeNotification(taskId: String){
+		UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [taskId])
+		UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [taskId])
+		
+		UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["\(taskId)_incomplete"])
+		UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["\(taskId)_incomplete"])
+		
+		print("deleted")
 	}
 }
 
