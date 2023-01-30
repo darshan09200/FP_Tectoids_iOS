@@ -383,13 +383,22 @@ extension NotesViewController: UISearchControllerDelegate, UISearchBarDelegate {
 
 extension NotesViewController: UITableViewDelegate, UITableViewDataSource{
 	func numberOfSections(in tableView: UITableView) -> Int {
+		let count: Int
 		if isFiltering{
-			return 1
+			count = 1
 		} else if segmentControl.selectedSegmentIndex == 0 {
-			return notes.count
+			count = notes.count
 		} else {
-			return taskList.count
+			count = taskList.count
 		}
+		
+		if count == 0 {
+			tableView.setEmptyView(title: "No Records")
+		} else {
+			tableView.restore()
+		}
+		
+		return count
 	}
 	
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

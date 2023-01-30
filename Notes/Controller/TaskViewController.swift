@@ -216,7 +216,13 @@ extension TaskViewController: UITableViewDelegate, UITableViewDataSource{
 	}
 	
 	func numberOfSections(in tableView: UITableView) -> Int {
-		return tasks.count
+		let count = tasks.count
+		if count == 0 {
+			tableView.setEmptyView(title: "No Records")
+		} else {
+			tableView.restore()
+		}
+		return count
 	}
 	
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

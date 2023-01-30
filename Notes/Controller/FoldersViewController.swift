@@ -165,11 +165,20 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 extension FoldersViewController:  UITableViewDelegate, UITableViewDataSource{
 	
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+		let count: Int
 		if isFiltering {
-			return filteredFolders.count
+			count = filteredFolders.count
 		} else {
-			return getFolders().count
+			count = getFolders().count
 		}
+		
+		if count == 0 {
+			tableView.setEmptyView(title: "No Records")
+		} else {
+			tableView.restore()
+		}
+		
+		return count
 	}
 	
 	func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration?
