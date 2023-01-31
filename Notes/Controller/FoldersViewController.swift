@@ -71,7 +71,7 @@ class FoldersViewController: UIViewController, UISearchResultsUpdating {
 		var sortPredicate = [NSSortDescriptor]()
 		let currentSort = getCurrentSort()
 		if currentSort == .title || currentSort == .none{
-			sortPredicate.append(NSSortDescriptor(key: "name", ascending: false, selector: #selector(NSString.localizedStandardCompare)))
+			sortPredicate.append(NSSortDescriptor(key: "name", ascending: true, selector: #selector(NSString.localizedStandardCompare)))
 		} else if currentSort == .date{
 			sortPredicate.append(NSSortDescriptor(key: "createdOn", ascending: false))
 		}
